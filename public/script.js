@@ -136,6 +136,17 @@ document.querySelectorAll('.ex-tab').forEach(tab => {
   });
 })();
 
+/* ── Bio language toggle ── */
+document.querySelectorAll('.bio-lang').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.bio-lang').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    const lang = btn.dataset.lang;
+    document.querySelector('.bio-en').style.display = lang === 'en' ? 'block' : 'none';
+    document.querySelector('.bio-am').style.display = lang === 'am' ? 'block' : 'none';
+  });
+});
+
 /* ── EmailJS config ── */
 const EMAILJS_SERVICE_ID  = 'service_7vou6xh';
 const EMAILJS_TEMPLATE_ID = 'template_xkdh9qq';
