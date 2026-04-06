@@ -299,6 +299,7 @@ section { padding: 8rem 4rem; }
 .about-tag { font-size: 0.7rem; letter-spacing: 4px; text-transform: uppercase; color: var(--gold); margin-bottom: 1rem; }
 .about-name { font-family: var(--font-serif); font-size: 2.5rem; margin-bottom: 2rem; }
 .about-bio p { font-size: 1rem; line-height: 1.9; color: rgba(240,237,232,0.7); margin-bottom: 1.2rem; }
+.bio-divider { width: 40px; height: 1px; background: var(--gold); margin: 2rem 0; opacity: 0.5; }
 .bio-toggle { display: flex; gap: 0.5rem; margin-bottom: 1.5rem; }
 .bio-lang {
   background: none; border: 1px solid rgba(201,168,76,0.3);
