@@ -112,6 +112,7 @@ document.querySelectorAll('.ex-tab').forEach(tab => {
     lightboxCaption.textContent = images[i].caption;
     lightbox.classList.add('active');
     document.body.style.overflow = 'hidden';
+    history.pushState({ lightbox: true }, '');
   }
   function close() {
     lightbox.classList.remove('active');
@@ -124,6 +125,9 @@ document.querySelectorAll('.ex-tab').forEach(tab => {
   document.getElementById('lightboxPrev').addEventListener('click', prev);
   document.getElementById('lightboxNext').addEventListener('click', next);
   lightbox.addEventListener('click', e => { if (e.target === lightbox) close(); });
+  window.addEventListener('popstate', e => {
+    if (lightbox.classList.contains('active')) close();
+  });
   document.addEventListener('keydown', e => {
     if (!lightbox.classList.contains('active')) return;
     if (e.key === 'Escape') close();
