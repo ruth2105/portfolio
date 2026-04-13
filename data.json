@@ -1,0 +1,298 @@
+{
+  "site": {
+    "name": "Estifanos Solomon",
+    "nameAmharic": "እስጢፋኖስ ሰሎሞን",
+    "title": "Visual Artist · Printmaker",
+    "location": "Addis Ababa, Ethiopia",
+    "heroHeading": "Art that refuses silence.",
+    "heroQuote": "\"When I create I feel very rational — escaped from the actual absurdity going on around me.\"",
+    "heroImage": "images/stillness.jpg",
+    "instagram": "https://instagram.com/estif_solomon17",
+    "email": "Estifsolomon17@gmail.com",
+    "phone": "+251 922 836 667",
+    "statementParagraphs": [
+      "My work confronts the failure of society to protect its most vulnerable: children. In a world increasingly shaped by individualism, consumerism, and instant gratification, the needs and voices of children are too often ignored or silenced.",
+      "I use painting and printmaking not only as creative expression but as a form of resistance — against apathy, injustice, and the systems that prioritize profit and ego over empathy and care.",
+      "I am deeply influenced by the stories I hear in my community — stories that reveal how children are affected by violence, instability, and the absence of protective structures.",
+      "I believe art has the power to challenge cultural values and provoke necessary reflection. Each piece asks: Are we truly supporting the next generation, or are we complicit in the erosion of their potential?"
+    ],
+    "statementQuote": "\"When I create I feel very rational in a way that I escaped without babysitting chaos or from actual absurdity going on around me.\"",
+    "aboutImage": "images/IMG_20251129_213106_436.jpg",
+    "bioParagraphs": [
+      "A visual artist from Ethiopia, based in Addis Ababa, exploring themes of passion, conflict, and personal narrative. My artistic journey began at the Russian Centre for Science and Culture (2014), developing foundational skills in art.",
+      "I earned a BFA in Printmaking from Addis Ababa University's Alle School of Fine Arts and Design (2022). Through painting and printmaking, I weave storytelling and lived experience into works that invite viewers into deeper emotional and societal reflection.",
+      "My practice extends beyond the studio — teaching at art academies and leading workshops at Tinishu Art Studio."
+    ],
+    "bioAmharic": [
+      "እስጢፋኖስ ሰሎሞን መቀመጫውን አድርጎ የሚሠራው ተወልዶ ባደገበት አዲስ አበባ ሲሆን፣ የኪነ-ጥበብ ጉዞው የጀመረዉ በ፳፻፲፬ በሩሲያ ሳይንስና ባህል ማዕከል ሲሆን፣ በዚያም የመሠረታዊ የስዕል ክህሎቶችን አገኘ።",
+      "በ፳፻፲፰ ከእንጦጦ ፖሊቴክኒክ ኮሌጅ በቀለም ቅብ በዲፕሎማ ተመረቀ፣ ከዛም በ፳፻፳፪ ከአዲስ አበባ ዩኒቨርሲቲ አለ የኪነ-ጥበብና ዲዛይን ትምህርት ቤት በህትመት ጥበብ ዲግሪ አገኘ።",
+      "በቀለም ቅብ እና በህትመት ጥበብ ስራዎቹ ውስጥ፣ እስጢፋኖስ ታሪክን ከሕይወት ልምዱ ጋር በመዋሃድ ይቀርባል፤ ይህም ስራዎቹን ለተመልካቾች ወደ ጥልቅ ስሜታዊና ማህበራዊ አስተያየቶች እንዲገቡ ያደርጋል።"
+    ],
+    "education": [
+      "BFA Printmaking — ASFAD, AAU, 2019–2022",
+      "Diploma Painting — Entoto Polytechnic, 2015–2018",
+      "Drawing & Painting — Enlightenment Art Academy, 2013–2015",
+      "Basic Art — Russian Cultural Centre, 2013–2014"
+    ],
+    "awards": [
+      "ART2 Foundation Grant Winner, 2025",
+      "Certificate of Excellence — Fine Art & Graphics Design",
+      "Certificate of Award — Sele Enat Mahiber",
+      "GIZ / S2GG Ethiopia Programme Certificate"
+    ],
+    "contactNote": "Available for commissions, exhibitions, collaborations, and printmaking workshops. Based in Addis Ababa — open to international projects."
+  },
+  "gallery": [
+    {
+      "id": "1",
+      "file": "images/playing-3.jpg",
+      "title": "Playing 3?",
+      "medium": "Mixed Media & Silk Screen",
+      "dimensions": "20x20cm",
+      "year": "2025"
+    },
+    {
+      "id": "2",
+      "file": "images/untitled-5.jpg",
+      "title": "Keep Me",
+      "medium": "Mixed Media & Silk Screen",
+      "dimensions": "20x20cm",
+      "year": "2025"
+    },
+    {
+      "id": "3",
+      "file": "images/untitled-6.jpg",
+      "title": "Without Disguise",
+      "medium": "Mixed Media & Silk Screen",
+      "dimensions": "20x20cm",
+      "year": "2025"
+    },
+    {
+      "id": "4",
+      "file": "images/a-disguise.jpg",
+      "title": "A Disguise",
+      "medium": "Mixed Media",
+      "dimensions": "20x20cm",
+      "year": "2025"
+    },
+    {
+      "id": "5",
+      "file": "images/forgotten-echoes.jpg",
+      "title": "Forgotten Echoes",
+      "medium": "Mixed Media, Oil & Silk Screen",
+      "dimensions": "43x36cm",
+      "year": "2025"
+    },
+    {
+      "id": "6",
+      "file": "images/concealed.jpg",
+      "title": "Concealed?",
+      "medium": "Mixed Media, Oil & Silk Screen",
+      "dimensions": "80x80cm",
+      "year": "2025"
+    },
+    {
+      "id": "7",
+      "file": "images/contented-with-dreaming.jpg",
+      "title": "Contented with Dreaming",
+      "medium": "Mixed Media",
+      "dimensions": "110x70cm",
+      "year": ""
+    },
+    {
+      "id": "8",
+      "file": "images/through.jpg",
+      "title": "Through",
+      "medium": "Mixed Media, Oil & Silk Screen",
+      "dimensions": "100x100cm",
+      "year": "2025"
+    },
+    {
+      "id": "9",
+      "file": "images/stillness.jpg",
+      "title": "Stillness",
+      "medium": "Mixed Media, Oil & Silk Screen",
+      "dimensions": "100x100cm",
+      "year": "2025"
+    },
+    {
+      "id": "10",
+      "file": "images/untitled-1.jpg",
+      "title": "Untitled",
+      "medium": "Mixed Media, Oil & Silk Screen",
+      "dimensions": "100x100cm",
+      "year": "2026"
+    },
+    {
+      "id": "11",
+      "file": "images/untitled-2.jpg",
+      "title": "Untitled",
+      "medium": "Mixed Media, Oil & Silk Screen",
+      "dimensions": "100x100cm",
+      "year": "2025"
+    },
+    {
+      "id": "12",
+      "file": "images/untitled-3.jpg",
+      "title": "Untitled",
+      "medium": "Mixed Media, Oil & Silk Screen",
+      "dimensions": "100x100cm",
+      "year": "2025"
+    },
+    {
+      "id": "13",
+      "file": "images/playing.jpg",
+      "title": "Playing?",
+      "medium": "Mixed Media, Oil & Silk Screen",
+      "dimensions": "100x100cm",
+      "year": "2025"
+    },
+    {
+      "id": "14",
+      "file": "images/untitled-4.jpg",
+      "title": "Untitled",
+      "medium": "Mixed Media, Oil & Silk Screen",
+      "dimensions": "100x100cm",
+      "year": "2025"
+    },
+    {
+      "id": "15",
+      "file": "images/playing-2.jpg",
+      "title": "Playing 2?",
+      "medium": "Mixed Media, Oil & Silk Screen",
+      "dimensions": "100x100cm",
+      "year": "2025"
+    },
+    {
+      "id": "16",
+      "file": "images/concealed-2.jpg",
+      "title": "Concealed 2",
+      "medium": "Mixed Media",
+      "dimensions": "100x100cm",
+      "year": "2025"
+    },
+    {
+      "id": "17",
+      "file": "images/captured.jpg",
+      "title": "Captured",
+      "medium": "Mixed Media on canvas",
+      "dimensions": "120x85cm",
+      "year": ""
+    }
+  ],
+  "exhibitions": {
+    "group": [
+      {
+        "id": "g1",
+        "year": "2025",
+        "title": "The Others Art Fair 2025",
+        "venue": "Turin, Italy"
+      },
+      {
+        "id": "g2",
+        "year": "2025",
+        "title": "Addis Art Unveiled — Contemporary Collection",
+        "venue": "Goethe Institute, Addis Ababa"
+      },
+      {
+        "id": "g3",
+        "year": "2024",
+        "title": "Impression of Africa — Jean-Michel Basquiat",
+        "venue": "Alliance Ethio-Française, Addis Ababa"
+      },
+      {
+        "id": "g4",
+        "year": "2023",
+        "title": "View of Abyssinia",
+        "venue": "Combine Art Gallery, Seoul, South Korea"
+      },
+      {
+        "id": "g5",
+        "year": "2022–23",
+        "title": "Big Art Auction Art Fair",
+        "venue": "Ghion Hotel, Addis Ababa"
+      },
+      {
+        "id": "g6",
+        "year": "2022",
+        "title": "No More Art Movement — International Printmaking Exhibition",
+        "venue": "Gebre Kristos Desta Modern Art Museum"
+      },
+      {
+        "id": "g7",
+        "year": "2022",
+        "title": "Annual Graduate Students Exhibition",
+        "venue": "ASFAD, Addis Ababa University"
+      },
+      {
+        "id": "g8",
+        "year": "2022",
+        "title": "Group Exhibition",
+        "venue": "Entoto Art Gallery, Addis Ababa"
+      },
+      {
+        "id": "g9",
+        "year": "2018",
+        "title": "Annual Group Exhibition",
+        "venue": "Entoto Polytechnic College Art Gallery"
+      },
+      {
+        "id": "g10",
+        "year": "2013–14",
+        "title": "Graduation Group Exhibition",
+        "venue": "Russian Cultural Center, Addis Ababa"
+      }
+    ],
+    "solo": [
+      {
+        "id": "s1",
+        "year": "2024",
+        "title": "Oppressed Passions",
+        "venue": "Artawi Gallery, Addis Ababa"
+      }
+    ],
+    "workshops": [
+      {
+        "id": "w1",
+        "year": "2024–25",
+        "title": "Painting & Printmaking Workshops",
+        "venue": "Tinishu Art Studio, Addis Ababa"
+      },
+      {
+        "id": "w2",
+        "year": "2019",
+        "title": "Creative In-Design Project",
+        "venue": "Alle School of Fine Arts & Design, Addis Ababa"
+      }
+    ]
+  },
+  "pressStatic": [
+    {
+      "id": "p1",
+      "num": "01",
+      "title": "Discovering Passion Inside the Chaos",
+      "publication": "Suboart International Art Magazine — Lisbon, Portugal",
+      "date": "November 2025 · Edition Nr. 50",
+      "link": "https://suboartmagazine.com/2025/11/21/suboart-magazine-nr-49-50/"
+    },
+    {
+      "id": "p2",
+      "num": "02",
+      "title": "Art That Refuses Silence: Forgotten Echoes",
+      "publication": "Ambrosia Journal — Lithuania",
+      "date": "2025",
+      "link": "https://www.ambrosecreatives.com/theambrosiajournal/estifanossolomon"
+    },
+    {
+      "id": "p3",
+      "num": "03",
+      "title": "Atelier Unraveled: Q&A",
+      "publication": "Threads: The Art Exchange — Michigan, USA",
+      "date": "2026",
+      "link": "https://www.threadsartexchange.com/interview-estifanos-solomon"
+    }
+  ],
+  "events": [],
+  "projects": [],
+  "press": []
+}
