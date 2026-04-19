@@ -167,5 +167,6 @@ app.get('/', (req, res) => res.sendFile(path.join(__dirname, 'public', 'index.ht
 
 app.listen(PORT, async () => {
   console.log(`Server running on port ${PORT}`);
+  console.log(`MONGODB_URI set: ${!!process.env.MONGODB_URI}`);
   await seedIfEmpty();
 });
