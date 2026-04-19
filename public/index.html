@@ -167,6 +167,8 @@
     const fmt = d => d ? new Date(d).toLocaleDateString('en-GB',{day:'numeric',month:'long',year:'numeric'}) : '';
     const yr  = d => d ? new Date(d).getFullYear() : '';
 
+    const fixPath = p => p && !p.startsWith('/') && !p.startsWith('http') ? '/' + p : p;
+
     // NAV + TITLE
     document.title = site.name + ' — ' + site.title;
     document.getElementById('nav-name').textContent = site.name;
@@ -180,7 +182,7 @@
     document.getElementById('hero-heading').innerHTML =
       hWords.slice(0, mid).join(' ') + '<br><em>' + hWords[mid] + '</em><br>' + hWords.slice(mid+1).join(' ');
     document.getElementById('hero-quote').textContent = site.heroQuote;
-    document.getElementById('hero-img').src = site.heroImage;
+    document.getElementById('hero-img').src = fixPath(site.heroImage);
     document.getElementById('hero-socials').innerHTML = `
       <a href="${site.instagram}" target="_blank" aria-label="Instagram"><i class="bi bi-instagram"></i></a>
       <a href="mailto:${site.email}" aria-label="Email"><i class="bi bi-envelope"></i></a>`;
@@ -188,7 +190,7 @@
     // GALLERY
     document.getElementById('galleryGrid').innerHTML = gallery.map(g => `
       <div class="gallery-item reveal">
-        <img src="${g.file}" alt="${g.title}">
+        <img src="${fixPath(g.file)}" alt="${g.title}">
         <div class="gallery-overlay">
           <h4>${g.title}</h4>
           <span>${[g.medium, g.dimensions, g.year].filter(Boolean).join(' · ')}</span>
@@ -202,7 +204,7 @@
     document.getElementById('statement-quote').textContent = site.statementQuote;
 
     // ABOUT
-    document.getElementById('about-img').src = site.aboutImage;
+    document.getElementById('about-img').src = fixPath(site.aboutImage);
     document.getElementById('about-name').textContent = site.name;
     document.getElementById('about-amharic').textContent = site.nameAmharic || '';
     const bioHTML = (site.bioParagraphs||[]).map(p=>`<p>${p}</p>`).join('') +
