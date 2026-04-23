@@ -8,12 +8,35 @@
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css" rel="stylesheet">
   <style>
     body { background:#f0f0f0; font-size:.9rem; }
-    .sidebar { min-height:100vh; background:#111; position:sticky; top:0; height:100vh; overflow-y:auto; }
-    .sidebar h4 { color:#fff; padding:1.5rem 1.2rem .1rem; margin:0; font-size:1rem; }
-    .sidebar .sub { color:#666; padding:0 1.2rem .8rem; font-size:.75rem; }
+
+    /* ── Sidebar ── */
+    .sidebar { background:#111; }
+    .sidebar h4 { color:#fff; padding:1rem 1.2rem .1rem; margin:0; font-size:1rem; }
+    .sidebar .sub { color:#666; padding:0 1.2rem .6rem; font-size:.75rem; }
     .sidebar .nav-link { color:#aaa; padding:.7rem 1.2rem; display:flex; align-items:center; gap:.5rem; border-radius:0; font-size:.85rem; }
     .sidebar .nav-link:hover,.sidebar .nav-link.active { background:#222; color:#fff; }
     .sidebar hr { border-color:#222; margin:.3rem 1rem; }
+
+    /* Desktop: sticky full-height sidebar */
+    @media (min-width: 768px) {
+      .sidebar { min-height:100vh; position:sticky; top:0; height:100vh; overflow-y:auto; }
+    }
+
+    /* Mobile: top bar + collapsible menu */
+    @media (max-width: 767px) {
+      .sidebar { position:relative; }
+      .sidebar-toggle { display:flex; align-items:center; justify-content:space-between; padding:.8rem 1.2rem; cursor:pointer; }
+      .sidebar-toggle span { color:#fff; font-weight:600; font-size:.95rem; }
+      .sidebar-nav { display:none; }
+      .sidebar-nav.open { display:block; }
+      .main-col { padding: 1rem !important; }
+    }
+    @media (min-width: 768px) {
+      .sidebar-toggle { display:none; }
+      .sidebar-nav { display:block !important; }
+    }
+
+    /* ── Content ── */
     .section { display:none; }
     .section.active { display:block; }
     .card-item { background:#fff; border-radius:8px; padding:.9rem 1rem; margin-bottom:.5rem; display:flex; align-items:flex-start; gap:.75rem; box-shadow:0 1px 3px rgba(0,0,0,.07); }
@@ -25,7 +48,6 @@
     .thumb { width:56px; height:56px; object-fit:cover; border-radius:6px; flex-shrink:0; }
     .section-title { font-size:1rem; font-weight:600; margin-bottom:1rem; }
     textarea.form-control { resize:vertical; }
-    .list-group-item { font-size:.85rem; }
   </style>
 </head>
 <body>
@@ -33,22 +55,27 @@
   <div class="row g-0">
 
     <div class="col-md-2 sidebar">
-      <h4>Admin Panel</h4>
-      <p class="sub">Estifanos Solomon</p>
-      <nav class="nav flex-column">
-        <a class="nav-link active" href="#" data-section="site"><i class="bi bi-sliders"></i> Site Settings</a>
-        <a class="nav-link" href="#" data-section="statement"><i class="bi bi-chat-quote"></i> Statement</a>
-        <a class="nav-link" href="#" data-section="gallery"><i class="bi bi-images"></i> Gallery</a>
-        <a class="nav-link" href="#" data-section="exhibitions"><i class="bi bi-calendar3"></i> Exhibitions</a>
-        <a class="nav-link" href="#" data-section="events"><i class="bi bi-calendar-event"></i> Upcoming Events</a>
-        <a class="nav-link" href="#" data-section="projects"><i class="bi bi-folder"></i> Projects</a>
-        <a class="nav-link" href="#" data-section="press"><i class="bi bi-newspaper"></i> Press</a>
-        <hr>
-        <a class="nav-link" href="/" target="_blank"><i class="bi bi-box-arrow-up-right"></i> View Portfolio</a>
-      </nav>
+      <div class="sidebar-toggle" id="sidebarToggle">
+        <span><i class="bi bi-list me-2"></i>Admin Panel</span>
+        <i class="bi bi-chevron-down text-secondary" id="toggleIcon"></i>
+      </div>
+      <div class="sidebar-nav" id="sidebarNav">
+        <p class="sub d-none d-md-block">Estifanos Solomon</p>
+        <nav class="nav flex-column">
+          <a class="nav-link active" href="#" data-section="site"><i class="bi bi-sliders"></i> Site Settings</a>
+          <a class="nav-link" href="#" data-section="statement"><i class="bi bi-chat-quote"></i> Statement</a>
+          <a class="nav-link" href="#" data-section="gallery"><i class="bi bi-images"></i> Gallery</a>
+          <a class="nav-link" href="#" data-section="exhibitions"><i class="bi bi-calendar3"></i> Exhibitions</a>
+          <a class="nav-link" href="#" data-section="events"><i class="bi bi-calendar-event"></i> Upcoming Events</a>
+          <a class="nav-link" href="#" data-section="projects"><i class="bi bi-folder"></i> Projects</a>
+          <a class="nav-link" href="#" data-section="press"><i class="bi bi-newspaper"></i> Press</a>
+          <hr>
+          <a class="nav-link" href="/" target="_blank"><i class="bi bi-box-arrow-up-right"></i> View Portfolio</a>
+        </nav>
+      </div>
     </div>
 
-    <div class="col-md-10 p-4">
+    <div class="col-md-10 p-4 main-col">
 
       <!-- SITE SETTINGS -->
       <div id="site" class="section active">
@@ -227,6 +254,24 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+  // Mobile sidebar toggle
+  document.getElementById('sidebarToggle').addEventListener('click', () => {
+    const nav = document.getElementById('sidebarNav');
+    const icon = document.getElementById('toggleIcon');
+    nav.classList.toggle('open');
+    icon.className = nav.classList.contains('open') ? 'bi bi-chevron-up text-secondary' : 'bi bi-chevron-down text-secondary';
+  });
+  // Close sidebar on nav link click (mobile)
+  document.querySelectorAll('[data-section]').forEach(link => {
+    link.addEventListener('click', () => {
+      if (window.innerWidth < 768) {
+        document.getElementById('sidebarNav').classList.remove('open');
+        document.getElementById('toggleIcon').className = 'bi bi-chevron-down text-secondary';
+      }
+    });
+  });
+</script>
 <script src="/admin/admin.js"></script>
 </body>
 </html>
