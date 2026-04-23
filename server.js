@@ -182,68 +182,6 @@ app.use('/api', (req, res, next) => {
   requireAuth(req, res, next);
 });
 
-// Rate limiter - max 5 login attempts per 15 minutes
-const loginAttempts = new Map();
-function checkRateLimit(ip) {
-  const now = Date.now();
-  const key = ip;
-  const record = loginAttempts.get(key) || { count: 0, resetAt: now + 15 * 60 * 1000 };
-  if (now > record.resetAt) { record.count = 0; record.resetAt = now + 15 * 60 * 1000; }
-  record.count++;
-  loginAttempts.set(key, record);
-  return record.count <= 5;
-}
-
-async function getAdminPassword() {
-  const site = await Site.findOne().lean();
-  return site?.adminPassword || DEFAULT_PASSWORD;
-}
-
-app.post('/api/login', async (req, res) => {
-  const ip = req.ip || req.connection.remoteAddress;
-  if (!checkRateLimit(ip)) {
-    return res.status(429).json({ message: 'Too many attempts. Try again in 15 minutes.' });
-  }
-  const { password } = req.body;
-  if (!password) return res.status(400).json({ message: 'Password required' });
-  const adminPassword = await getAdminPassword();
-  if (password !== adminPassword) {
-    return res.status(401).json({ message: 'Wrong password' });
-  }
-  // Reset rate limit on success
-  loginAttempts.delete(ip);
-  const token = jwt.sign({ admin: true }, JWT_SECRET, { expiresIn: '24h' });
-  res.json({ success: true, token });
-});
-
-function requireAuth(req, res, next) {
-  const auth = req.headers['authorization'];
-  const token = auth && auth.replace('Bearer ', '');
-  if (!token) return res.status(401).json({ message: 'Unauthorized' });
-  try {
-    jwt.verify(token, JWT_SECRET);
-    next();
-  } catch {
-    return res.status(401).json({ message: 'Session expired. Please login again.' });
-  }
-}
-
-app.post('/api/change-password', requireAuth, async (req, res) => {
-  const { newPassword } = req.body;
-  if (!newPassword || newPassword.length < 8) {
-    return res.status(400).json({ message: 'Password must be at least 8 characters' });
-  }
-  await Site.findOneAndUpdate({}, { $set: { adminPassword: newPassword } }, { upsert: true });
-  res.json({ success: true });
-});
-
-// Protect all write API routes
-app.use('/api', (req, res, next) => {
-  if (req.method === 'GET') return next();
-  if (req.path === '/login') return next();
-  requireAuth(req, res, next);
-});
-
 // ── SITE ─────────────────────────────────────────────────────
 app.get('/api/site', async (req, res) => {
   const site = await Site.findOne().lean();
