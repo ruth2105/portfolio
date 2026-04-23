@@ -300,7 +300,7 @@
     document.getElementById('press-grid').innerHTML = allPress.map(p => {
       const tag = p.link ? 'a' : 'div';
       const attrs = p.link ? `href="${p.link}" target="_blank" rel="noopener"` : '';
-      return `<${tag} ${attrs} class="press-card press-card-link reveal">
+      return `<${tag} ${attrs} class="press-card press-card-link">
         <span class="press-num">${p.numStr||p.num}</span>
         ${p.image?`<img src="${p.image}" style="width:100%;height:140px;object-fit:cover;border-radius:6px;margin-bottom:.75rem">`:''}
         <h4>${p.title}</h4>
@@ -309,6 +309,12 @@
         ${p.link?`<span style="display:inline-block;margin-top:.75rem;font-size:.78rem;letter-spacing:.08em;text-transform:uppercase;border-bottom:1px solid currentColor;padding-bottom:2px;opacity:.7">Read Article ↗</span>`:''}
       </${tag}>`;
     }).join('');
+
+    // Re-observe all reveal elements after full page load
+    document.querySelectorAll('.reveal').forEach(el => revealObserver.observe(el));
+
+    // Re-observe all reveal elements after full page load
+    document.querySelectorAll('.reveal').forEach(el => revealObserver.observe(el));
 
     // CONTACT
     document.getElementById('contact-note').textContent = site.contactNote;
