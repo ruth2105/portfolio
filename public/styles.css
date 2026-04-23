@@ -265,7 +265,8 @@ section { padding: 8rem 4rem; }
   color: rgba(201,168,76,0.03); line-height: 1;
   pointer-events: none; user-select: none;
 }
-.statement-inner { max-width: 800px; }
+.statement-inner { max-width: 800px; display: flex; gap: 3rem; align-items: flex-start; }
+.statement-inner > div:last-child { padding-top: 0; margin-top: 0; }
 .statement-body p {
   font-size: clamp(1rem, 1.5vw, 1.2rem);
   line-height: 2; color: rgba(240,237,232,0.75);
