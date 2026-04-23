@@ -194,7 +194,9 @@
       <a href="${site.instagram}" target="_blank" aria-label="Instagram"><i class="bi bi-instagram"></i></a>
       <a href="mailto:${site.email}" aria-label="Email"><i class="bi bi-envelope"></i></a>`;
 
-    // GALLERY
+    // GALLERY - sort by area ascending
+    const area = d => { if(!d) return 999999; const m=d.match(/([\d.]+)[x*]([\d.]+)/i); return m?parseFloat(m[1])*parseFloat(m[2]):999999; };
+    gallery.sort((a,b) => area(a.dimensions) - area(b.dimensions));
     document.getElementById('galleryGrid').innerHTML = gallery.map(g => `
       <div class="gallery-item reveal">
         <img src="${fixPath(g.file)}" alt="${g.title}">
