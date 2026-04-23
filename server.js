@@ -4,6 +4,7 @@ const path = require('path');
 const fs = require('fs');
 const multer = require('multer');
 const mongoose = require('mongoose');
+const cookieParser = require('cookie-parser');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -62,15 +63,124 @@ const storage = multer.diskStorage({
 });
 const upload = multer({ storage, limits: { fileSize: 10 * 1024 * 1024 } });
 
-app.use(express.json());
+app.use(express.json({ limit: '10mb' }));
+app.use(cookieParser());
+
+// ── Security headers ──────────────────────────────────────────
+const helmet = require('helmet');
+app.use(helmet({
+  contentSecurityPolicy: false // allow CDN resources
+}));
+
+// ── Force HTTPS in production ─────────────────────────────────
+app.use((req, res, next) => {
+  if (process.env.NODE_ENV === 'production' && req.headers['x-forwarded-proto'] !== 'https') {
+    return res.redirect('https://' + req.headers.host + req.url);
+  }
+  next();
+});
+
 app.use(express.static('public'));
 app.use('/admin', express.static(path.join(__dirname, 'admin')));
 app.get('/admin', (req, res) => res.sendFile(path.join(__dirname, 'admin', 'index.html')));
 
 // ── Auth ─────────────────────────────────────────────────────
-const jwt = require('jsonwebtoken');
-const JWT_SECRET = process.env.JWT_SECRET || 'estif-portfolio-secret-2025';
+const jwt      = require('jsonwebtoken');
+const bcrypt   = require('bcryptjs');
+const JWT_SECRET      = process.env.JWT_SECRET || 'estif-portfolio-secret-change-me';
 const DEFAULT_PASSWORD = process.env.ADMIN_PASSWORD || 'Estif@2025';
+
+// Rate limiter — 5 attempts per 15 min per IP
+const loginAttempts = new Map();
+function checkRateLimit(ip) {
+  const now = Date.now();
+  const rec = loginAttempts.get(ip) || { count: 0, resetAt: now + 15 * 60 * 1000 };
+  if (now > rec.resetAt) { rec.count = 0; rec.resetAt = now + 15 * 60 * 1000; }
+  rec.count++;
+  loginAttempts.set(ip, rec);
+  return { allowed: rec.count <= 5, remaining: Math.max(0, 5 - rec.count) };
+}
+
+async function getAdminPasswordHash() {
+  const site = await Site.findOne().lean();
+  // stored as bcrypt hash or plain (legacy)
+  return site?.adminPasswordHash || null;
+}
+
+app.post('/api/login', async (req, res) => {
+  const ip = req.ip || req.connection.remoteAddress;
+  const { allowed } = checkRateLimit(ip);
+  if (!allowed) return res.status(429).json({ message: 'Too many attempts. Try again in 15 minutes.' });
+
+  const { password } = req.body;
+  if (!password || typeof password !== 'string') return res.status(400).json({ message: 'Password required' });
+
+  const hash = await getAdminPasswordHash();
+  let valid = false;
+
+  if (hash) {
+    valid = await bcrypt.compare(password, hash);
+  } else {
+    // fallback to plain text default
+    valid = password === DEFAULT_PASSWORD;
+    if (valid) {
+      // upgrade to hash on first login
+      const newHash = await bcrypt.hash(password, 12);
+      await Site.findOneAndUpdate({}, { $set: { adminPasswordHash: newHash } }, { upsert: true });
+    }
+  }
+
+  if (!valid) return res.status(401).json({ message: 'Wrong password' });
+
+  loginAttempts.delete(ip);
+  const token = jwt.sign({ admin: true, iat: Date.now() }, JWT_SECRET, { expiresIn: '24h' });
+
+  // Set httpOnly cookie + also return token for header-based auth
+  res.cookie('adminToken', token, {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: 'strict',
+    maxAge: 24 * 60 * 60 * 1000
+  });
+  res.json({ success: true, token });
+});
+
+app.post('/api/logout', (req, res) => {
+  res.clearCookie('adminToken');
+  res.json({ success: true });
+});
+
+function requireAuth(req, res, next) {
+  const cookieToken = req.cookies?.adminToken;
+  const headerToken = req.headers['authorization']?.replace('Bearer ', '');
+  const token = cookieToken || headerToken;
+  if (!token) return res.status(401).json({ message: 'Unauthorized' });
+  try {
+    jwt.verify(token, JWT_SECRET);
+    next();
+  } catch {
+    res.clearCookie('adminToken');
+    return res.status(401).json({ message: 'Session expired. Please login again.' });
+  }
+}
+
+app.post('/api/change-password', requireAuth, async (req, res) => {
+  const { newPassword } = req.body;
+  if (!newPassword || typeof newPassword !== 'string' || newPassword.length < 8) {
+    return res.status(400).json({ message: 'Password must be at least 8 characters' });
+  }
+  const hash = await bcrypt.hash(newPassword, 12);
+  await Site.findOneAndUpdate({}, { $set: { adminPasswordHash: hash, adminPassword: null } }, { upsert: true });
+  res.clearCookie('adminToken');
+  res.json({ success: true, message: 'Password updated. Please login again.' });
+});
+
+// Protect all write API routes
+app.use('/api', (req, res, next) => {
+  if (req.method === 'GET') return next();
+  if (['/login', '/logout'].includes(req.path)) return next();
+  requireAuth(req, res, next);
+});
 
 // Rate limiter - max 5 login attempts per 15 minutes
 const loginAttempts = new Map();
