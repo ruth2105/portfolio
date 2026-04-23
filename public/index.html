@@ -228,14 +228,16 @@
     // UPCOMING EVENTS
     if (events.length) {
       document.getElementById('dynamic-events').innerHTML = events.map(e => `
-        <li>
-          <span class="ex-year">${yr(e.date)}</span>
-          <div class="ex-info">
-            ${e.image?`<img src="${e.image}" style="width:100%;max-width:320px;border-radius:8px;margin-bottom:.5rem;display:block">`:''}
-            <strong>${e.title}</strong>
-            <span>${[fmt(e.date),e.location].filter(Boolean).join(' · ')}</span>
-            ${e.description?`<span style="display:block;font-size:.85em;opacity:.65;margin-top:.2rem">${e.description}</span>`:''}
-            ${e.link?`<a href="${e.link}" target="_blank" style="font-size:.82em">More info ↗</a>`:''}
+        <li style="display:block;padding:0;margin-bottom:2rem;border:none">
+          <div style="display:grid;grid-template-columns:${e.image?'1fr 1fr':'1fr'};gap:2rem;align-items:start;background:rgba(255,255,255,0.03);border-radius:12px;padding:1.5rem;border:1px solid rgba(255,255,255,0.07)">
+            ${e.image?`<img src="${e.image}" style="width:100%;border-radius:8px;object-fit:cover;max-height:280px">`:'' }
+            <div>
+              <p style="font-size:.75rem;letter-spacing:.12em;text-transform:uppercase;opacity:.5;margin-bottom:.4rem">${fmt(e.date)}</p>
+              <h3 style="font-size:1.4rem;font-weight:600;margin-bottom:.5rem;line-height:1.3">${e.title}</h3>
+              ${e.location?`<p style="font-size:.85rem;opacity:.6;margin-bottom:.75rem;display:flex;align-items:center;gap:.3rem"><i class="bi bi-geo-alt"></i> ${e.location}</p>`:''}
+              ${e.description?`<p style="font-size:.9rem;line-height:1.7;opacity:.8;margin-bottom:1rem">${e.description}</p>`:''}
+              ${e.link?`<a href="${e.link}" target="_blank" style="display:inline-flex;align-items:center;gap:.4rem;font-size:.85rem;padding:.5rem 1.1rem;border:1px solid currentColor;border-radius:4px;text-decoration:none;opacity:.8">More info <i class="bi bi-arrow-up-right"></i></a>`:''}
+            </div>
           </div>
         </li>`).join('');
       document.getElementById('upcoming').style.display = '';
