@@ -197,6 +197,28 @@
         </div>
       </div>`).join('');
 
+    // Re-observe new reveal elements and re-init lightbox
+    const revealObserver = new IntersectionObserver(entries => {
+      entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
+    }, { threshold: 0.1, rootMargin: '0px 0px -60px 0px' });
+    document.querySelectorAll('.reveal').forEach(el => revealObserver.observe(el));
+
+    // Re-init lightbox with new gallery items
+    const items = document.querySelectorAll('.gallery-item');
+    const images = Array.from(items).map(item => ({
+      src: item.querySelector('img').src,
+      caption: item.querySelector('h4')?.textContent || ''
+    }));
+    items.forEach((item, i) => {
+      item.addEventListener('click', () => {
+        const lightbox = document.getElementById('lightbox');
+        document.getElementById('lightboxImg').src = images[i].src;
+        document.getElementById('lightboxCaption').textContent = images[i].caption;
+        lightbox.classList.add('active');
+        document.body.style.overflow = 'hidden';
+      });
+    });
+
     // STATEMENT
     document.getElementById('statement-body').innerHTML =
       (site.statementParagraphs || []).map((p,i) =>
