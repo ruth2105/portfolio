@@ -84,6 +84,8 @@
           <a class="nav-link" href="#" data-section="projects"><i class="bi bi-folder"></i> Projects</a>
           <a class="nav-link" href="#" data-section="press"><i class="bi bi-newspaper"></i> Press</a>
           <hr>
+          <a class="nav-link" href="#" data-section="password"><i class="bi bi-key"></i> Change Password</a>
+          <hr>
           <a class="nav-link" href="/" target="_blank"><i class="bi bi-box-arrow-up-right"></i> View Portfolio</a>
         </nav>
       </div>
@@ -244,6 +246,27 @@
           <button class="btn btn-dark btn-sm" id="add-press-btn"><i class="bi bi-plus-lg"></i> Add Press</button>
         </div>
         <div id="press-list"></div>
+      </div>
+
+      <!-- CHANGE PASSWORD -->
+      <div id="password" class="section">
+        <p class="section-title">Change Password</p>
+        <div style="max-width:360px">
+          <div class="mb-3">
+            <label class="form-label">Current Password</label>
+            <input type="password" class="form-control" id="currentPw">
+          </div>
+          <div class="mb-3">
+            <label class="form-label">New Password</label>
+            <input type="password" class="form-control" id="newPw">
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Confirm New Password</label>
+            <input type="password" class="form-control" id="confirmPw">
+          </div>
+          <button class="btn btn-dark" id="changePwBtn">Update Password</button>
+          <p id="pw-msg" class="mt-2 small" style="display:none"></p>
+        </div>
       </div>
 
     </div>

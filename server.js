@@ -68,29 +68,52 @@ app.use('/admin', express.static(path.join(__dirname, 'admin')));
 app.get('/admin', (req, res) => res.sendFile(path.join(__dirname, 'admin', 'index.html')));
 
 // ── Auth ─────────────────────────────────────────────────────
-const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'Estif@2025';
+const DEFAULT_PASSWORD = process.env.ADMIN_PASSWORD || 'Estif@2025';
 
-app.post('/api/login', (req, res) => {
+async function getAdminPassword() {
+  const site = await Site.findOne().lean();
+  return site?.adminPassword || DEFAULT_PASSWORD;
+}
+
+app.post('/api/login', async (req, res) => {
   const { password } = req.body;
-  if (password === ADMIN_PASSWORD) {
-    res.json({ success: true, token: Buffer.from(ADMIN_PASSWORD).toString('base64') });
+  const adminPassword = await getAdminPassword();
+  if (password === adminPassword) {
+    res.json({ success: true, token: Buffer.from(password).toString('base64') });
   } else {
     res.status(401).json({ message: 'Wrong password' });
   }
 });
 
-function requireAuth(req, res, next) {
+async function requireAuth(req, res, next) {
   const auth = req.headers['authorization'];
   const token = auth && auth.replace('Bearer ', '');
-  if (!token || Buffer.from(token, 'base64').toString() !== ADMIN_PASSWORD) {
+  if (!token) return res.status(401).json({ message: 'Unauthorized' });
+  const adminPassword = await getAdminPassword();
+  if (Buffer.from(token, 'base64').toString() !== adminPassword) {
     return res.status(401).json({ message: 'Unauthorized' });
   }
   next();
 }
 
+app.post('/api/change-password', async (req, res) => {
+  const auth = req.headers['authorization'];
+  const token = auth && auth.replace('Bearer ', '');
+  const adminPassword = await getAdminPassword();
+  if (!token || Buffer.from(token, 'base64').toString() !== adminPassword) {
+    return res.status(401).json({ message: 'Unauthorized' });
+  }
+  const { newPassword } = req.body;
+  if (!newPassword || newPassword.length < 6) {
+    return res.status(400).json({ message: 'Password must be at least 6 characters' });
+  }
+  await Site.findOneAndUpdate({}, { $set: { adminPassword: newPassword } }, { upsert: true });
+  res.json({ success: true });
+});
+
 // Protect all write API routes
 app.use('/api', (req, res, next) => {
-  if (req.method === 'GET') return next(); // public reads allowed
+  if (req.method === 'GET') return next();
   if (req.path === '/login') return next();
   requireAuth(req, res, next);
 });

@@ -366,6 +366,40 @@ document.addEventListener('DOMContentLoaded', () => {
   };
   window._edit = (type, id) => openModal(type, id);
 
+  // ── CHANGE PASSWORD ──────────────────────────────────────────
+  document.getElementById('changePwBtn').addEventListener('click', async () => {
+    const current = document.getElementById('currentPw').value;
+    const newPw = document.getElementById('newPw').value;
+    const confirm = document.getElementById('confirmPw').value;
+    const msg = document.getElementById('pw-msg');
+
+    if (newPw !== confirm) {
+      msg.textContent = 'Passwords do not match'; msg.className = 'mt-2 small text-danger'; msg.style.display = 'block'; return;
+    }
+    if (newPw.length < 6) {
+      msg.textContent = 'Password must be at least 6 characters'; msg.className = 'mt-2 small text-danger'; msg.style.display = 'block'; return;
+    }
+
+    // verify current password first
+    const loginRes = await fetch('/api/login', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ password: current }) });
+    if (!loginRes.ok) {
+      msg.textContent = 'Current password is wrong'; msg.className = 'mt-2 small text-danger'; msg.style.display = 'block'; return;
+    }
+
+    const res = await apiFetch('/api/change-password', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ newPassword: newPw }) });
+    if (res.ok) {
+      // update stored token
+      const newToken = Buffer.from(newPw).toString('base64');
+      localStorage.setItem('adminToken', btoa(newPw));
+      msg.textContent = 'Password updated successfully!'; msg.className = 'mt-2 small text-success'; msg.style.display = 'block';
+      document.getElementById('currentPw').value = '';
+      document.getElementById('newPw').value = '';
+      document.getElementById('confirmPw').value = '';
+    } else {
+      msg.textContent = 'Failed to update password'; msg.className = 'mt-2 small text-danger'; msg.style.display = 'block';
+    }
+  });
+
   // ── Init ─────────────────────────────────────────────────────
   loadSite();
 });
