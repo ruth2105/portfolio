@@ -401,5 +401,8 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   // ── Init ─────────────────────────────────────────────────────
-  loadSite();
+  window._adminInit = () => loadSite();
+
+  // Only auto-init if already logged in (token was saved)
+  if (localStorage.getItem('adminToken')) loadSite();
 });
