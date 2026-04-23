@@ -267,6 +267,11 @@ section { padding: 8rem 4rem; }
 }
 .statement-inner { max-width: 800px; display: flex; gap: 3rem; align-items: flex-start; }
 .statement-inner > div:last-child { padding-top: 0; margin-top: 0; }
+.statement-body {
+  column-count: 2;
+  column-gap: 2.5rem;
+  column-rule: 1px solid rgba(255,255,255,0.07);
+}
 .statement-body p {
   font-size: clamp(1rem, 1.5vw, 1.2rem);
   line-height: 2; color: rgba(240,237,232,0.75);
