@@ -67,6 +67,34 @@ app.use(express.static('public'));
 app.use('/admin', express.static(path.join(__dirname, 'admin')));
 app.get('/admin', (req, res) => res.sendFile(path.join(__dirname, 'admin', 'index.html')));
 
+// ── Auth ─────────────────────────────────────────────────────
+const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'Estif@2025';
+
+app.post('/api/login', (req, res) => {
+  const { password } = req.body;
+  if (password === ADMIN_PASSWORD) {
+    res.json({ success: true, token: Buffer.from(ADMIN_PASSWORD).toString('base64') });
+  } else {
+    res.status(401).json({ message: 'Wrong password' });
+  }
+});
+
+function requireAuth(req, res, next) {
+  const auth = req.headers['authorization'];
+  const token = auth && auth.replace('Bearer ', '');
+  if (!token || Buffer.from(token, 'base64').toString() !== ADMIN_PASSWORD) {
+    return res.status(401).json({ message: 'Unauthorized' });
+  }
+  next();
+}
+
+// Protect all write API routes
+app.use('/api', (req, res, next) => {
+  if (req.method === 'GET') return next(); // public reads allowed
+  if (req.path === '/login') return next();
+  requireAuth(req, res, next);
+});
+
 // ── SITE ─────────────────────────────────────────────────────
 app.get('/api/site', async (req, res) => {
   const site = await Site.findOne().lean();

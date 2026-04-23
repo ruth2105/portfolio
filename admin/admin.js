@@ -1,7 +1,20 @@
 document.addEventListener('DOMContentLoaded', () => {
   const bsModal = new bootstrap.Modal(document.getElementById('itemModal'));
   let currentSection = 'site';
-  let modalContext = null; // { type, tab, id }
+  let modalContext = null;
+
+  const token = localStorage.getItem('adminToken');
+  const authHeaders = { 'Authorization': `Bearer ${token}` };
+
+  async function apiFetch(url, options = {}) {
+    const headers = { ...authHeaders, ...(options.headers || {}) };
+    const res = await fetch(url, { ...options, headers });
+    if (res.status === 401) {
+      localStorage.removeItem('adminToken');
+      location.reload();
+    }
+    return res;
+  }
 
   // ── Navigation ──────────────────────────────────────────────
   document.querySelectorAll('[data-section]').forEach(link => {
@@ -72,7 +85,7 @@ document.addEventListener('DOMContentLoaded', () => {
     fd.append('awards',        JSON.stringify(document.getElementById('awards-raw').value.split('\n').map(s=>s.trim()).filter(Boolean)));
     const imgFile = f.querySelector('[name="aboutImage"]').files[0];
     if (imgFile) fd.append('aboutImage', imgFile);
-    await fetch('/api/site', { method: 'PUT', body: fd });
+    await apiFetch('/api/site', { method: 'PUT', body: fd });
     flash('site-msg');
   });
 
@@ -90,7 +103,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const fd = new FormData();
     fd.append('statementParagraphs', JSON.stringify(paras));
     fd.append('statementQuote', quote);
-    await fetch('/api/site', { method: 'PUT', body: fd });
+    await apiFetch('/api/site', { method: 'PUT', body: fd });
     flash('stmt-msg');
   });
 
@@ -169,7 +182,7 @@ document.addEventListener('DOMContentLoaded', () => {
   window._editEx = (tab, id) => window.openExModal(tab, id);
   window._delEx = async (tab, id) => {
     if (!confirm('Delete?')) return;
-    await fetch(`/api/exhibitions/${tab}/${id}`, { method: 'DELETE' });
+    await apiFetch(`/api/exhibitions/${tab}/${id}`, { method: 'DELETE' });
     loadExList(tab);
   };
 
@@ -308,7 +321,7 @@ document.addEventListener('DOMContentLoaded', () => {
       if (!body.title) { document.getElementById('f_title').classList.add('is-invalid'); return; }
       const url = id ? `/api/exhibitions/${tab}/${id}` : `/api/exhibitions/${tab}`;
       const method = id ? 'PUT' : 'POST';
-      await fetch(url, { method, headers:{'Content-Type':'application/json'}, body: JSON.stringify(body) });
+      await apiFetch(url, { method, headers:{'Content-Type':'application/json'}, body: JSON.stringify(body) });
       bsModal.hide();
       loadExList(tab);
       return;
@@ -336,7 +349,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const endpoint = isGallery ? '/api/gallery' : `/api/${type}`;
     const url = id ? `${endpoint}/${id}` : endpoint;
     const method = id ? 'PUT' : 'POST';
-    const res = await fetch(url, { method, body: fd });
+    const res = await apiFetch(url, { method, body: fd });
     if (!res.ok) { alert('Save failed'); return; }
     bsModal.hide();
     if (isGallery) loadGallery();
@@ -347,7 +360,7 @@ document.addEventListener('DOMContentLoaded', () => {
   window._del = async (type, id) => {
     if (!confirm('Delete this item?')) return;
     const endpoint = type === 'gallery' ? '/api/gallery' : `/api/${type}`;
-    await fetch(`${endpoint}/${id}`, { method: 'DELETE' });
+    await apiFetch(`${endpoint}/${id}`, { method: 'DELETE' });
     if (type === 'gallery') loadGallery();
     else loadList(type);
   };
