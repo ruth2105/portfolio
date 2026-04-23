@@ -141,8 +141,8 @@ app.get('/api/gallery', async (req, res) => {
   res.json(await GalleryItem.find().lean());
 });
 app.post('/api/gallery', upload.single('image'), async (req, res) => {
-  if (!req.file) return res.status(400).json({ message: 'Image required' });
-  const item = await GalleryItem.create({ ...req.body, file: '/uploads/' + req.file.filename });
+  if (!req.file && !req.body.file) return res.status(400).json({ message: 'Image required' });
+  const item = await GalleryItem.create({ ...req.body, file: req.file ? '/uploads/' + req.file.filename : req.body.file });
   res.json(item);
 });
 app.put('/api/gallery/:id', upload.single('image'), async (req, res) => {
