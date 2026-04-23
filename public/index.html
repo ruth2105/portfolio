@@ -32,18 +32,24 @@
   </nav>
 
   <!-- HERO -->
-  <section id="home" class="hero">
-    <div class="hero-content">
-      <p class="hero-tag reveal" id="hero-location"></p>
-      <h1 class="reveal reveal-delay-1" id="hero-heading"></h1>
-      <p class="hero-description reveal reveal-delay-2" id="hero-quote"></p>
+  <section id="home" class="hero" style="position:relative;overflow:hidden;min-height:100vh;display:flex;align-items:center;justify-content:center;">
+    <!-- Blurred background image -->
+    <div style="position:absolute;inset:0;background-image:url('/images/hero-artist.jpg');background-size:cover;background-position:center;filter:blur(6px);transform:scale(1.08);z-index:0;"></div>
+    <!-- Dark overlay -->
+    <div style="position:absolute;inset:0;background:rgba(0,0,0,0.55);z-index:1;"></div>
+    <!-- Content -->
+    <div style="position:relative;z-index:2;text-align:center;padding:2rem;max-width:700px;margin:0 auto;">
+      <p class="reveal" id="hero-location" style="font-size:.75rem;letter-spacing:.15em;text-transform:uppercase;opacity:.6;margin-bottom:1.5rem;color:#fff;"></p>
+      <h1 class="reveal reveal-delay-1" id="hero-name-en" style="font-size:clamp(2.5rem,6vw,5rem);font-weight:700;color:#fff;margin-bottom:.25rem;line-height:1.1;"></h1>
+      <p class="reveal reveal-delay-1" id="hero-name-am" style="font-size:clamp(1rem,2.5vw,1.6rem);color:rgba(255,255,255,0.55);margin-bottom:.5rem;font-weight:300;"></p>
+      <p class="reveal reveal-delay-2" id="hero-title-line" style="font-size:.85rem;letter-spacing:.12em;text-transform:uppercase;color:rgba(255,255,255,0.45);margin-bottom:2rem;"></p>
+      <p class="hero-description reveal reveal-delay-2" id="hero-quote" style="font-size:clamp(.95rem,2vw,1.15rem);font-style:italic;color:rgba(255,255,255,0.75);line-height:1.8;margin-bottom:2.5rem;"></p>
       <div class="hero-btns reveal reveal-delay-3">
         <a href="#gallery" class="btn-primary">Enter Gallery</a>
         <a href="#statement" class="btn-ghost">Read Statement</a>
       </div>
-      <div class="hero-socials reveal reveal-delay-3" id="hero-socials"></div>
+      <div class="hero-socials reveal reveal-delay-3" id="hero-socials" style="margin-top:1.5rem;"></div>
     </div>
-    <div class="hero-image"><div class="hero-image-wrap"><img id="hero-img" src="" alt="Hero"></div></div>
     <div class="hero-scroll">Scroll</div>
   </section>
 
@@ -177,12 +183,10 @@
 
     // HERO
     document.getElementById('hero-location').textContent = site.location;
-    const hWords = site.heroHeading.split(' ');
-    const mid = Math.floor(hWords.length / 2);
-    document.getElementById('hero-heading').innerHTML =
-      hWords.slice(0, mid).join(' ') + '<br><em>' + hWords[mid] + '</em><br>' + hWords.slice(mid+1).join(' ');
+    document.getElementById('hero-name-en').textContent = site.name;
+    document.getElementById('hero-name-am').textContent = site.nameAmharic || '';
+    document.getElementById('hero-title-line').textContent = site.title;
     document.getElementById('hero-quote').textContent = site.heroQuote;
-    document.getElementById('hero-img').src = fixPath(site.heroImage);
     document.getElementById('hero-socials').innerHTML = `
       <a href="${site.instagram}" target="_blank" aria-label="Instagram"><i class="bi bi-instagram"></i></a>
       <a href="mailto:${site.email}" aria-label="Email"><i class="bi bi-envelope"></i></a>`;
