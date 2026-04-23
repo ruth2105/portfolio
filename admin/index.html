@@ -313,9 +313,10 @@
       localStorage.setItem('adminToken', token);
       document.getElementById('loginScreen').style.display = 'none';
       document.getElementById('adminDashboard').style.display = 'block';
-      // trigger initial load after login
       if (window._adminInit) window._adminInit();
     } else {
+      const data = await res.json();
+      document.getElementById('loginError').textContent = data.message || 'Wrong password';
       document.getElementById('loginError').style.display = 'block';
     }
   });

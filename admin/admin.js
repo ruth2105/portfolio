@@ -11,6 +11,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const res = await fetch(url, { ...options, headers });
     if (res.status === 401) {
       localStorage.removeItem('adminToken');
+      alert('Session expired. Please login again.');
       location.reload();
     }
     return res;
