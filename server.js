@@ -5,6 +5,9 @@ const fs = require('fs');
 const multer = require('multer');
 const mongoose = require('mongoose');
 const cookieParser = require('cookie-parser');
+const helmet = require('helmet');
+const jwt = require('jsonwebtoken');
+const bcrypt = require('bcryptjs');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -65,12 +68,7 @@ const upload = multer({ storage, limits: { fileSize: 10 * 1024 * 1024 } });
 
 app.use(express.json({ limit: '10mb' }));
 app.use(cookieParser());
-
-// ── Security headers ──────────────────────────────────────────
-const helmet = require('helmet');
-app.use(helmet({
-  contentSecurityPolicy: false // allow CDN resources
-}));
+app.use(helmet({ contentSecurityPolicy: false }));
 
 // ── Force HTTPS in production ─────────────────────────────────
 app.use((req, res, next) => {
@@ -85,8 +83,6 @@ app.use('/admin', express.static(path.join(__dirname, 'admin')));
 app.get('/admin', (req, res) => res.sendFile(path.join(__dirname, 'admin', 'index.html')));
 
 // ── Auth ─────────────────────────────────────────────────────
-const jwt      = require('jsonwebtoken');
-const bcrypt   = require('bcryptjs');
 const JWT_SECRET      = process.env.JWT_SECRET || 'estif-portfolio-secret-change-me';
 const DEFAULT_PASSWORD = process.env.ADMIN_PASSWORD || 'Estif@2025';
 

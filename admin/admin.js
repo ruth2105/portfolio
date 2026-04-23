@@ -377,8 +377,8 @@ document.addEventListener('DOMContentLoaded', () => {
     if (newPw !== confirm) {
       msg.textContent = 'Passwords do not match'; msg.className = 'mt-2 small text-danger'; msg.style.display = 'block'; return;
     }
-    if (newPw.length < 6) {
-      msg.textContent = 'Password must be at least 6 characters'; msg.className = 'mt-2 small text-danger'; msg.style.display = 'block'; return;
+    if (newPw.length < 8) {
+      msg.textContent = 'Password must be at least 8 characters'; msg.className = 'mt-2 small text-danger'; msg.style.display = 'block'; return;
     }
 
     // verify current password first
@@ -389,15 +389,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const res = await apiFetch('/api/change-password', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ newPassword: newPw }) });
     if (res.ok) {
-      // update stored token
-      const newToken = Buffer.from(newPw).toString('base64');
-      localStorage.setItem('adminToken', btoa(newPw));
-      msg.textContent = 'Password updated successfully!'; msg.className = 'mt-2 small text-success'; msg.style.display = 'block';
-      document.getElementById('currentPw').value = '';
-      document.getElementById('newPw').value = '';
-      document.getElementById('confirmPw').value = '';
+      msg.textContent = 'Password updated! Please login again.'; msg.className = 'mt-2 small text-success'; msg.style.display = 'block';
+      setTimeout(() => {
+        localStorage.removeItem('adminToken');
+        location.reload();
+      }, 2000);
     } else {
-      msg.textContent = 'Failed to update password'; msg.className = 'mt-2 small text-danger'; msg.style.display = 'block';
+      const d = await res.json();
+      msg.textContent = d.message || 'Failed to update password'; msg.className = 'mt-2 small text-danger'; msg.style.display = 'block';
     }
   });
 

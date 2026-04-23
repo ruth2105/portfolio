@@ -297,8 +297,16 @@
   // ── Login ──
   const savedToken = localStorage.getItem('adminToken');
   if (savedToken) {
-    document.getElementById('loginScreen').style.display = 'none';
-    document.getElementById('adminDashboard').style.display = 'block';
+    // Verify token is still valid
+    fetch('/api/site', { headers: { Authorization: 'Bearer ' + savedToken } })
+      .then(r => {
+        if (r.ok || r.status !== 401) {
+          document.getElementById('loginScreen').style.display = 'none';
+          document.getElementById('adminDashboard').style.display = 'block';
+        } else {
+          localStorage.removeItem('adminToken');
+        }
+      }).catch(() => localStorage.removeItem('adminToken'));
   }
 
   document.getElementById('loginBtn').addEventListener('click', async () => {
