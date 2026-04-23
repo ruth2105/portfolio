@@ -377,7 +377,7 @@ section { padding: 8rem 4rem; }
 .press-card:hover::before { height: 100%; }
 .press-card-link {
   text-decoration: none;
-  color: inherit;
+  color: var(--white);
   display: block;
   cursor: pointer;
 }
