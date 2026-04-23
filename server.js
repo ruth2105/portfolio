@@ -171,6 +171,14 @@ app.post('/api/change-password', requireAuth, async (req, res) => {
   res.json({ success: true, message: 'Password updated. Please login again.' });
 });
 
+// ── Temporary password reset (remove after use) ──────────────
+app.get('/api/reset-admin-password', async (req, res) => {
+  const key = req.query.key;
+  if (key !== 'reset-estif-2025') return res.status(403).json({ message: 'Forbidden' });
+  await Site.findOneAndUpdate({}, { $unset: { adminPasswordHash: 1, adminPassword: 1 } }, { upsert: true });
+  res.json({ success: true, message: 'Password reset to default: Estif@2025' });
+});
+
 // Protect all write API routes
 app.use('/api', (req, res, next) => {
   if (req.method === 'GET') return next();
