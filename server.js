@@ -9,6 +9,10 @@ const helmet = require('helmet');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
 
+// Prevent crashes from unhandled errors
+process.on('uncaughtException', err => console.error('Uncaught Exception:', err));
+process.on('unhandledRejection', err => console.error('Unhandled Rejection:', err));
+
 const app = express();
 const PORT = process.env.PORT || 3000;
 const UPLOADS_DIR = path.join(__dirname, 'public', 'uploads');
@@ -67,11 +71,11 @@ const storage = multer.diskStorage({
 const upload = multer({ storage, limits: { fileSize: 20 * 1024 * 1024 } });
 
 // ── Image optimization helper ────────────────────────────────
-let sharp;
-try { sharp = require('sharp'); } catch { sharp = null; }
+let sharp = null;
+try { sharp = require('sharp'); console.log('sharp loaded OK'); } catch (e) { console.log('sharp not available, skipping image optimization:', e.message); }
 
 async function optimizeImage(filePath) {
-  if (!sharp) return; // skip if sharp not available
+  if (!sharp) return;
   const ext = path.extname(filePath).toLowerCase();
   if (!['.jpg','.jpeg','.png','.webp'].includes(ext)) return;
   try {
@@ -81,8 +85,9 @@ async function optimizeImage(filePath) {
       .jpeg({ quality: 82, progressive: true })
       .toFile(tmpPath);
     fs.renameSync(tmpPath, filePath);
+    console.log('Image optimized:', path.basename(filePath));
   } catch (e) {
-    console.error('Image optimization failed:', e.message);
+    console.error('Image optimization failed (non-fatal):', e.message);
   }
 }
 
