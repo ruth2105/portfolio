@@ -1,0 +1,15 @@
+node_modules
+.env
+.git
+.gitignore
+*.log
+uploads/
+.npmrc
+railway.json
+Procfile
+fix_*.py
+*.bak
+README*.md
+DEPLOY*.md
+VERCEL*.md
+database.json
