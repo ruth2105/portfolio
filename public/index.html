@@ -374,8 +374,7 @@
 
     // STATEMENT
     document.getElementById('statement-body').innerHTML =
-      (site.statementParagraphs || []).map((p, i) =>
-        `<p class="reveal${i > 0 ? ' reveal-delay-' + Math.min(i, 3) : ''}">${p}</p>`).join('');
+      (site.statementParagraphs || []).map(p => `<p>${p}</p>`).join('');
     document.getElementById('statement-quote').textContent = site.statementQuote;
 
     // ABOUT
