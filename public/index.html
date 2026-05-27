@@ -223,15 +223,33 @@
   <div id="lightbox" class="lightbox" role="dialog" aria-modal="true" aria-label="Image viewer">
     <button class="lightbox-close" id="lightboxClose" aria-label="Close">&times;</button>
     <button class="lightbox-prev" id="lightboxPrev" aria-label="Previous">&#8249;</button>
-    <div class="lightbox-inner">
-      <img id="lightboxImg" src="" alt="">
-      <div class="lightbox-info">
-        <h3 class="lightbox-title" id="lightboxTitle"></h3>
-        <p class="lightbox-meta" id="lightboxMedium"></p>
-        <p class="lightbox-meta" id="lightboxDimensions"></p>
-        <p class="lightbox-year" id="lightboxYear"></p>
+
+    <div class="lightbox-layout">
+      <!-- Left: image -->
+      <div class="lightbox-img-col">
+        <img id="lightboxImg" src="" alt="">
+      </div>
+      <!-- Right: info + comments -->
+      <div class="lightbox-detail-col">
+        <div class="lightbox-info">
+          <h3 class="lightbox-title" id="lightboxTitle"></h3>
+          <p class="lightbox-meta" id="lightboxMedium"></p>
+          <p class="lightbox-meta" id="lightboxDimensions"></p>
+          <p class="lightbox-year" id="lightboxYear"></p>
+        </div>
+        <div class="lightbox-comments">
+          <h4 class="lc-heading">Comments</h4>
+          <div class="lc-list" id="lcList"><p class="lc-empty">No comments yet.</p></div>
+          <form class="lc-form" id="lcForm">
+            <input class="lc-input" id="lcName" type="text" placeholder="Your name *" maxlength="80" required>
+            <textarea class="lc-input lc-textarea" id="lcMessage" placeholder="Your thoughts on this work *" maxlength="600" required></textarea>
+            <button type="submit" class="lc-submit">Post Comment</button>
+            <p class="lc-note" id="lcNote"></p>
+          </form>
+        </div>
       </div>
     </div>
+
     <button class="lightbox-next" id="lightboxNext" aria-label="Next">&#8250;</button>
   </div>
   </div>
@@ -284,6 +302,7 @@
     });
     document.getElementById('galleryGrid').innerHTML = gallery.map(g => `
       <div class="gallery-item reveal"
+           data-id="${g._id}"
            data-title="${g.title}"
            data-medium="${g.medium || ''}"
            data-dimensions="${g.dimensions || ''}"
@@ -305,6 +324,7 @@
     const items = document.querySelectorAll('.gallery-item');
     const images = Array.from(items).map(item => ({
       src: item.querySelector('img').src,
+      id: item.dataset.id || '',
       title: item.dataset.title || '',
       medium: item.dataset.medium || '',
       dimensions: item.dataset.dimensions || '',

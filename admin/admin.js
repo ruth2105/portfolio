@@ -227,6 +227,7 @@ function initDashboard() {
       else if (sec === 'exhibitions') loadExhibitions();
       else if (sec === 'password') initPasswordSection();
       else if (['events','projects','press'].includes(sec)) loadList(sec);
+      else if (sec === 'comments') loadComments();
       if (window.innerWidth < 768) {
         document.getElementById('sidebarNav').classList.remove('open');
         document.getElementById('toggleIcon').className = 'bi bi-chevron-down text-secondary';
@@ -300,6 +301,7 @@ function initDashboard() {
 
   /* load site on first open */
   loadSite();
+  loadPendingCount();
 
   /* ── GALLERY ── */
   async function loadGallery() {
@@ -677,6 +679,90 @@ function initDashboard() {
         const d = await res.json().catch(function() { return {}; });
         showErr(d.message || 'Failed to update password');
       }
+    });
+  }
+
+} /* end initDashboard */
+
+  /* ── COMMENTS ── */
+  let currentCommentFilter = 'pending';
+
+  async function loadPendingCount() {
+    try {
+      const all = await apiFetch('/api/admin/comments').then(r => r.json());
+      const pending = all.filter(c => !c.approved).length;
+      const badge = document.getElementById('nav-pending-badge');
+      if (badge) {
+        badge.textContent = pending;
+        badge.style.display = pending > 0 ? 'inline' : 'none';
+      }
+    } catch {}
+  }
+
+  async function loadComments() {
+    const all = await apiFetch('/api/admin/comments').then(r => r.json());
+    const pending = all.filter(c => !c.approved).length;
+    const pendingEl = document.getElementById('pending-count');
+    if (pendingEl) pendingEl.textContent = pending + ' pending';
+
+    document.querySelectorAll('.comment-filter-btn').forEach(btn => {
+      btn.addEventListener('click', function() {
+        document.querySelectorAll('.comment-filter-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        currentCommentFilter = btn.dataset.filter;
+        renderComments(all, currentCommentFilter);
+      });
+    });
+
+    renderComments(all, currentCommentFilter);
+  }
+
+  function renderComments(all, filter) {
+    const c = document.getElementById('comments-list');
+    let items = all;
+    if (filter === 'pending') items = all.filter(c => !c.approved);
+    if (filter === 'approved') items = all.filter(c => c.approved);
+
+    if (!items.length) {
+      c.innerHTML = '<p class="empty-msg">No ' + filter + ' comments.</p>';
+      return;
+    }
+
+    c.innerHTML = items.map(function(cm) {
+      const date = new Date(cm.createdAt).toLocaleDateString('en-GB', {day:'numeric',month:'short',year:'numeric'});
+      return (
+        '<div class="card-item" style="flex-direction:column;align-items:stretch;gap:.5rem">' +
+          '<div class="d-flex justify-content-between align-items-start">' +
+            '<div>' +
+              '<strong style="font-size:.88rem">' + esc(cm.name) + '</strong>' +
+              '<span class="ms-2 badge ' + (cm.approved ? 'bg-success' : 'bg-warning text-dark') + '">' + (cm.approved ? 'Approved' : 'Pending') + '</span>' +
+            '</div>' +
+            '<small class="text-muted">' + esc(date) + '</small>' +
+          '</div>' +
+          '<small class="text-muted">On: <em>' + esc(cm.artworkTitle || cm.artworkId) + '</em></small>' +
+          '<p style="font-size:.85rem;margin:0;color:#444">' + esc(cm.message) + '</p>' +
+          '<div class="d-flex gap-2 mt-1">' +
+            (!cm.approved ? '<button class="btn btn-sm btn-success comment-approve" data-id="' + esc(cm._id) + '">Approve</button>' : '') +
+            '<button class="btn btn-sm btn-outline-danger comment-delete" data-id="' + esc(cm._id) + '">Delete</button>' +
+          '</div>' +
+        '</div>'
+      );
+    }).join('');
+
+    c.querySelectorAll('.comment-approve').forEach(btn => {
+      btn.addEventListener('click', async function() {
+        await apiFetch('/api/admin/comments/' + btn.dataset.id + '/approve', { method: 'PUT' });
+        loadComments();
+        loadPendingCount();
+      });
+    });
+    c.querySelectorAll('.comment-delete').forEach(btn => {
+      btn.addEventListener('click', async function() {
+        if (!confirm('Delete this comment?')) return;
+        await apiFetch('/api/admin/comments/' + btn.dataset.id, { method: 'DELETE' });
+        loadComments();
+        loadPendingCount();
+      });
     });
   }
 

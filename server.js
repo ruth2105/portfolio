@@ -33,6 +33,14 @@ const PressStatic= mongoose.model('PressStatic',new mongoose.Schema({}, { strict
 const Event      = mongoose.model('Event',      new mongoose.Schema({}, { strict: false }));
 const Project    = mongoose.model('Project',    new mongoose.Schema({}, { strict: false }));
 const PressItem  = mongoose.model('PressItem',  new mongoose.Schema({}, { strict: false }));
+const Comment    = mongoose.model('Comment', new mongoose.Schema({
+  artworkId:  { type: String, required: true, index: true },
+  artworkTitle: String,
+  name:       { type: String, required: true, maxlength: 80 },
+  message:    { type: String, required: true, maxlength: 600 },
+  approved:   { type: Boolean, default: false },
+  createdAt:  { type: Date, default: Date.now }
+}));
 
 // ── Seed initial data if empty ───────────────────────────────
 async function seedIfEmpty() {
@@ -348,6 +356,50 @@ function crudRoutes(Model, key) {
 crudRoutes(Event,     'events');
 crudRoutes(Project,   'projects');
 crudRoutes(PressItem, 'press');
+
+// ── COMMENTS ─────────────────────────────────────────────────
+// Get approved comments for an artwork
+app.get('/api/comments/:artworkId', async (req, res) => {
+  const comments = await Comment.find({
+    artworkId: req.params.artworkId,
+    approved: true
+  }).sort({ createdAt: -1 }).lean();
+  res.json(comments);
+});
+
+// Post a new comment (public — goes to moderation queue)
+app.post('/api/comments/:artworkId', async (req, res) => {
+  const { name, message, artworkTitle } = req.body;
+  if (!name || !message) return res.status(400).json({ message: 'Name and message required' });
+  if (name.length > 80) return res.status(400).json({ message: 'Name too long' });
+  if (message.length > 600) return res.status(400).json({ message: 'Message too long' });
+  const comment = await Comment.create({
+    artworkId: req.params.artworkId,
+    artworkTitle: artworkTitle || '',
+    name: name.trim(),
+    message: message.trim(),
+    approved: false
+  });
+  res.json({ success: true, message: 'Comment submitted for review' });
+});
+
+// Admin: get all comments (pending + approved)
+app.get('/api/admin/comments', requireAuth, async (req, res) => {
+  const comments = await Comment.find().sort({ createdAt: -1 }).lean();
+  res.json(comments);
+});
+
+// Admin: approve a comment
+app.put('/api/admin/comments/:id/approve', requireAuth, async (req, res) => {
+  await Comment.findByIdAndUpdate(req.params.id, { approved: true });
+  res.json({ success: true });
+});
+
+// Admin: delete a comment
+app.delete('/api/admin/comments/:id', requireAuth, async (req, res) => {
+  await Comment.findByIdAndDelete(req.params.id);
+  res.json({ success: true });
+});
 
 app.get('/', (req, res) => res.sendFile(path.join(__dirname, 'public', 'index.html')));
 

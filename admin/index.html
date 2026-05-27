@@ -88,6 +88,7 @@
           <a class="nav-link" href="#" data-section="events"><i class="bi bi-calendar-event"></i> Upcoming Events</a>
           <a class="nav-link" href="#" data-section="projects"><i class="bi bi-folder"></i> Projects</a>
           <a class="nav-link" href="#" data-section="press"><i class="bi bi-newspaper"></i> Press</a>
+          <a class="nav-link" href="#" data-section="comments"><i class="bi bi-chat-dots"></i> Comments <span id="nav-pending-badge" class="badge bg-warning text-dark ms-1" style="display:none"></span></a>
           <hr>
           <a class="nav-link" href="#" data-section="password"><i class="bi bi-key"></i> Change Password</a>
           <hr>
@@ -258,6 +259,20 @@
           <button class="btn btn-dark btn-sm" id="add-press-btn"><i class="bi bi-plus-lg"></i> Add Press</button>
         </div>
         <div id="press-list"></div>
+      </div>
+
+      <!-- COMMENTS -->
+      <div id="comments" class="section">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+          <p class="section-title mb-0">Artwork Comments</p>
+          <span class="badge bg-warning text-dark" id="pending-count"></span>
+        </div>
+        <div class="mb-3">
+          <button class="btn btn-sm btn-outline-dark me-2 comment-filter-btn active" data-filter="pending">Pending</button>
+          <button class="btn btn-sm btn-outline-dark comment-filter-btn" data-filter="approved">Approved</button>
+          <button class="btn btn-sm btn-outline-dark comment-filter-btn" data-filter="all">All</button>
+        </div>
+        <div id="comments-list"></div>
       </div>
 
       <!-- CHANGE PASSWORD -->

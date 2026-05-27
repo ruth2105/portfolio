@@ -114,14 +114,13 @@ document.querySelectorAll('.ex-tab').forEach(tab => {
     const items = document.querySelectorAll('.gallery-item');
     images = Array.from(items).map(item => ({
       src: item.querySelector('img').src,
+      id: item.dataset.id || '',
       title: item.dataset.title || '',
       medium: item.dataset.medium || '',
       dimensions: item.dataset.dimensions || '',
       year: item.dataset.year || ''
     }));
-    items.forEach((item, i) => {
-      item.addEventListener('click', () => open(i));
-    });
+    items.forEach((item, i) => item.addEventListener('click', () => open(i)));
   });
 
   function open(i) {
@@ -136,7 +135,9 @@ document.querySelectorAll('.ex-tab').forEach(tab => {
     lightbox.classList.add('active');
     document.body.style.overflow = 'hidden';
     history.pushState({ lightbox: true }, '');
+    loadComments(d.id);
   }
+
   function close() {
     lightbox.classList.remove('active');
     document.body.style.overflow = '';
@@ -155,6 +156,72 @@ document.querySelectorAll('.ex-tab').forEach(tab => {
     if (e.key === 'ArrowLeft') prev();
     if (e.key === 'ArrowRight') next();
   });
+
+  // ── Comments ──
+  async function loadComments(artworkId) {
+    const list = document.getElementById('lcList');
+    const note = document.getElementById('lcNote');
+    note.textContent = '';
+    list.innerHTML = '<p class="lc-empty">Loading...</p>';
+    try {
+      const comments = await fetch('/api/comments/' + artworkId).then(r => r.json());
+      if (!comments.length) {
+        list.innerHTML = '<p class="lc-empty">No comments yet. Be the first.</p>';
+      } else {
+        list.innerHTML = comments.map(c => `
+          <div class="lc-item">
+            <div class="lc-item-header">
+              <span class="lc-name">${escHtml(c.name)}</span>
+              <span class="lc-date">${new Date(c.createdAt).toLocaleDateString('en-GB', {day:'numeric',month:'short',year:'numeric'})}</span>
+            </div>
+            <p class="lc-message">${escHtml(c.message)}</p>
+          </div>`).join('');
+      }
+    } catch {
+      list.innerHTML = '<p class="lc-empty">Could not load comments.</p>';
+    }
+  }
+
+  document.getElementById('lcForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    const artworkId = images[current]?.id;
+    const artworkTitle = images[current]?.title;
+    const name = document.getElementById('lcName').value.trim();
+    const message = document.getElementById('lcMessage').value.trim();
+    const note = document.getElementById('lcNote');
+    const btn = this.querySelector('.lc-submit');
+    if (!name || !message) return;
+    btn.disabled = true;
+    btn.textContent = 'Posting...';
+    try {
+      const res = await fetch('/api/comments/' + artworkId, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, message, artworkTitle })
+      });
+      const data = await res.json();
+      if (res.ok) {
+        note.textContent = '✓ Comment submitted — it will appear after review.';
+        note.style.color = '#4ade80';
+        document.getElementById('lcName').value = '';
+        document.getElementById('lcMessage').value = '';
+      } else {
+        note.textContent = data.message || 'Failed to post.';
+        note.style.color = '#f87171';
+      }
+    } catch {
+      note.textContent = 'Network error. Please try again.';
+      note.style.color = '#f87171';
+    }
+    btn.disabled = false;
+    btn.textContent = 'Post Comment';
+  });
+
+  function escHtml(str) {
+    return String(str || '')
+      .replace(/&/g,'&amp;').replace(/</g,'&lt;')
+      .replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
 })();
 
 /* ── Bio language toggle ── */
