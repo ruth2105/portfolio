@@ -1,24 +1,18 @@
-/* ─────────────────────────────────────────────────────────────
-   admin.js  —  login + full admin panel
-   ───────────────────────────────────────────────────────────── */
+/* admin.js — login + full admin panel */
 
-/* ── XSS escape (used everywhere we write to innerHTML) ── */
 function esc(str) {
   if (str == null) return '';
   return String(str)
-    .replace(/&/g, '&amp;').replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;').replace(/"/g, '&quot;')
-    .replace(/'/g, '&#x27;');
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;')
+    .replace(/>/g,'&gt;').replace(/"/g,'&quot;')
+    .replace(/'/g,'&#x27;');
 }
 
-/* ── Auth token (sessionStorage — cleared on tab close) ── */
 const store = sessionStorage;
 function getToken() { return store.getItem('adminToken') || ''; }
-
 function authHeaders(extra) {
   return Object.assign({ 'Authorization': 'Bearer ' + getToken() }, extra || {});
 }
-
 async function apiFetch(url, options) {
   options = options || {};
   options.headers = Object.assign(authHeaders(), options.headers || {});
@@ -31,20 +25,14 @@ async function apiFetch(url, options) {
   return res;
 }
 
-/* ── Login rate limiter ── */
-const LOCKOUT_MS = 30000;
-const MAX_ATTEMPTS = 5;
-let loginAttempts = 0;
-let lockoutUntil = 0;
-
+const LOCKOUT_MS = 30000, MAX_ATTEMPTS = 5;
+let loginAttempts = 0, lockoutUntil = 0;
 function isLockedOut() { return Date.now() < lockoutUntil; }
-
 function showLoginError(msg) {
   const el = document.getElementById('loginError');
   el.textContent = msg;
   el.style.display = msg ? 'block' : 'none';
 }
-
 function startLockoutTimer() {
   const el = document.getElementById('lockoutMsg');
   document.getElementById('loginBtn').disabled = true;
@@ -62,15 +50,14 @@ function startLockoutTimer() {
   tick();
 }
 
-/* ── Login handler ── */
 async function doLogin() {
   if (isLockedOut()) { startLockoutTimer(); return; }
   const pwEl = document.getElementById('adminPassword');
   const pw = pwEl.value;
   if (!pw) return;
   document.getElementById('loginBtn').disabled = true;
+  document.getElementById('loginBtn').textContent = 'Logging in...';
   showLoginError('');
-
   try {
     const res = await fetch('/api/login', {
       method: 'POST',
@@ -78,7 +65,6 @@ async function doLogin() {
       body: JSON.stringify({ password: pw })
     });
     pwEl.value = '';
-
     if (res.ok) {
       const data = await res.json();
       store.setItem('adminToken', data.token);
@@ -88,42 +74,44 @@ async function doLogin() {
       initDashboard();
     } else {
       loginAttempts++;
-      const data = await res.json().catch(() => ({}));
+      let errMsg = 'Wrong password';
+      try { const d = await res.json(); errMsg = d.message || errMsg; } catch {}
+      if (res.status >= 500) errMsg = 'Server error (' + res.status + ')';
+      if (res.status === 404) errMsg = 'API not found (404)';
       if (loginAttempts >= MAX_ATTEMPTS) {
         lockoutUntil = Date.now() + LOCKOUT_MS;
-        showLoginError('');
-        startLockoutTimer();
+        showLoginError(''); startLockoutTimer();
       } else {
-        showLoginError(data.message || 'Wrong password');
+        showLoginError(errMsg);
         document.getElementById('loginBtn').disabled = false;
+        document.getElementById('loginBtn').textContent = 'Login';
       }
     }
   } catch (err) {
-    showLoginError('Network error — please try again.');
+    showLoginError('Network error: ' + err.message);
     document.getElementById('loginBtn').disabled = false;
+    document.getElementById('loginBtn').textContent = 'Login';
   }
 }
 
-/* ── Password show/hide toggle ── */
 function makeToggle(inputId, btnId) {
   const btn = document.getElementById(btnId);
   if (!btn) return;
   btn.addEventListener('click', function() {
     const inp = document.getElementById(inputId);
-    const isHidden = inp.type === 'password';
-    inp.type = isHidden ? 'text' : 'password';
-    btn.innerHTML = isHidden ? '<i class="bi bi-eye-slash"></i>' : '<i class="bi bi-eye"></i>';
+    const hidden = inp.type === 'password';
+    inp.type = hidden ? 'text' : 'password';
+    btn.innerHTML = hidden ? '<i class="bi bi-eye-slash"></i>' : '<i class="bi bi-eye"></i>';
   });
 }
 
-/* ── Password strength meter ── */
 function checkStrength(val) {
-  const fill  = document.getElementById('pw-strength-fill');
+  const fill = document.getElementById('pw-strength-fill');
   const label = document.getElementById('pw-strength-label');
   if (!fill) return;
   if (!val) { fill.style.width = '0'; label.textContent = ''; return; }
   let score = 0;
-  if (val.length >= 8)  score++;
+  if (val.length >= 8) score++;
   if (val.length >= 12) score++;
   if (/[A-Z]/.test(val)) score++;
   if (/[0-9]/.test(val)) score++;
@@ -133,7 +121,7 @@ function checkStrength(val) {
     { pct:'40%', color:'#f97316', text:'Weak' },
     { pct:'60%', color:'#eab308', text:'Fair' },
     { pct:'80%', color:'#22c55e', text:'Strong' },
-    { pct:'100%',color:'#16a34a', text:'Very strong' }
+    { pct:'100%', color:'#16a34a', text:'Very strong' }
   ];
   const lvl = levels[Math.min(score, 4)];
   fill.style.width = lvl.pct;
@@ -142,37 +130,26 @@ function checkStrength(val) {
   label.style.color = lvl.color;
 }
 
-/* ── Boot: wire up login UI as soon as DOM is ready ── */
 document.addEventListener('DOMContentLoaded', function() {
-
-  /* Login button + Enter key */
   document.getElementById('loginBtn').addEventListener('click', doLogin);
   document.getElementById('adminPassword').addEventListener('keydown', function(e) {
     if (e.key === 'Enter') doLogin();
   });
-
-  /* Show/hide on login screen */
   makeToggle('adminPassword', 'loginTogglePw');
-
-  /* Logout */
   document.getElementById('logoutBtn').addEventListener('click', async function(e) {
     e.preventDefault();
     await fetch('/api/logout', { method: 'POST' });
     store.removeItem('adminToken');
     location.reload();
   });
-
-  /* Mobile sidebar */
   document.getElementById('sidebarToggle').addEventListener('click', function() {
-    const nav  = document.getElementById('sidebarNav');
+    const nav = document.getElementById('sidebarNav');
     const icon = document.getElementById('toggleIcon');
     nav.classList.toggle('open');
     icon.className = nav.classList.contains('open')
       ? 'bi bi-chevron-up text-secondary'
       : 'bi bi-chevron-down text-secondary';
   });
-
-  /* Restore session if token still valid */
   const saved = getToken();
   if (saved) {
     fetch('/api/site', { headers: { Authorization: 'Bearer ' + saved } })
@@ -181,38 +158,28 @@ document.addEventListener('DOMContentLoaded', function() {
           document.getElementById('loginScreen').style.display = 'none';
           document.getElementById('adminDashboard').style.display = 'block';
           initDashboard();
-        } else {
-          store.removeItem('adminToken');
-        }
+        } else { store.removeItem('adminToken'); }
       })
       .catch(function() { store.removeItem('adminToken'); });
   }
 });
 
-/* ─────────────────────────────────────────────────────────────
-   Dashboard — runs after successful login
-   ───────────────────────────────────────────────────────────── */
 function initDashboard() {
   const bsModal = new bootstrap.Modal(document.getElementById('itemModal'));
   let modalContext = null;
-
   const MAX_LENGTHS = {
     title:200, name:120, year:10, venue:200, medium:120,
     dimensions:80, location:200, publication:200, link:500,
     description:2000, heroHeading:200, heroQuote:400,
     contactNote:500, instagram:200, email:200, phone:30
   };
-  function cap(key, value) {
-    return String(value || '').trim().slice(0, MAX_LENGTHS[key] || 1000);
-  }
-
+  function cap(key, value) { return String(value || '').trim().slice(0, MAX_LENGTHS[key] || 1000); }
   function flash(id) {
     const el = document.getElementById(id);
     el.style.display = 'inline';
     setTimeout(function() { el.style.display = 'none'; }, 2500);
   }
 
-  /* ── Navigation ── */
   document.querySelectorAll('[data-section]').forEach(function(link) {
     link.addEventListener('click', function(e) {
       e.preventDefault();
@@ -235,7 +202,6 @@ function initDashboard() {
     });
   });
 
-  /* ── SITE SETTINGS ── */
   async function loadSite() {
     const s = await apiFetch('/api/site').then(function(r) { return r.json(); });
     const f = document.getElementById('site-form');
@@ -251,7 +217,7 @@ function initDashboard() {
     document.getElementById('awards-raw').value = (s.awards || []).join('\n');
     if (s.aboutImage) {
       document.getElementById('about-img-preview').innerHTML =
-        '<img src="' + esc(s.aboutImage) + '" style="height:70px;border-radius:6px;object-fit:cover" alt="About photo">';
+        '<img src="' + esc(s.aboutImage) + '" style="height:70px;border-radius:6px;object-fit:cover" alt="">';
     }
     const cvEl = document.getElementById('cv-file-current');
     if (cvEl) {
@@ -278,10 +244,9 @@ function initDashboard() {
     if (cvFile) fd.append('cvFile', cvFile);
     await apiFetch('/api/site', { method: 'PUT', body: fd });
     flash('site-msg');
-    loadSite(); // refresh CV status
+    loadSite();
   });
 
-  /* ── STATEMENT ── */
   async function loadStatement() {
     const s = await apiFetch('/api/site').then(function(r) { return r.json(); });
     document.getElementById('stmt-paras').value = (s.statementParagraphs || []).join('\n\n');
@@ -299,27 +264,25 @@ function initDashboard() {
     flash('stmt-msg');
   });
 
-  /* load site on first open */
   loadSite();
   loadPendingCount();
 
-  /* ── GALLERY ── */
   async function loadGallery() {
     const items = await apiFetch('/api/gallery').then(function(r) { return r.json(); });
     const c = document.getElementById('gallery-list');
     if (!items.length) { c.innerHTML = '<p class="empty-msg">No artworks yet.</p>'; return; }
     c.innerHTML = '<p class="text-muted small mb-2"><i class="bi bi-grip-vertical"></i> Drag rows to reorder</p>' +
-      items.map(function(g) { return (
-      '<div class="card-item" data-id="' + esc(g._id) + '" data-type="gallery" draggable="true" style="cursor:grab">' +
-        '<i class="bi bi-grip-vertical text-muted me-1" style="font-size:1.1rem;flex-shrink:0"></i>' +
-        '<img src="' + esc(g.file) + '" class="thumb" alt="' + esc(g.title) + '">' +
-        '<div style="flex:1"><h6>' + esc(g.title) + '</h6>' +
-        '<small>' + esc([g.medium, g.dimensions, g.year].filter(Boolean).join(' · ')) + '</small></div>' +
-        '<div class="d-flex gap-1">' +
-          '<button class="btn-icon text-primary action-edit" aria-label="Edit"><i class="bi bi-pencil-square"></i></button>' +
-          '<button class="btn-icon text-danger action-del" aria-label="Delete"><i class="bi bi-trash"></i></button>' +
-        '</div></div>'
-    ); }).join('');
+      items.map(function(g) {
+        return '<div class="card-item" data-id="' + esc(g._id) + '" data-type="gallery" draggable="true" style="cursor:grab">' +
+          '<i class="bi bi-grip-vertical text-muted me-1" style="font-size:1.1rem;flex-shrink:0"></i>' +
+          '<img src="' + esc(g.file) + '" class="thumb" alt="' + esc(g.title) + '">' +
+          '<div style="flex:1"><h6>' + esc(g.title) + '</h6>' +
+          '<small>' + esc([g.medium, g.dimensions, g.year].filter(Boolean).join(' · ')) + '</small></div>' +
+          '<div class="d-flex gap-1">' +
+            '<button class="btn-icon text-primary action-edit" aria-label="Edit"><i class="bi bi-pencil-square"></i></button>' +
+            '<button class="btn-icon text-danger action-del" aria-label="Delete"><i class="bi bi-trash"></i></button>' +
+          '</div></div>';
+      }).join('');
     initDragSort(c);
   }
 
@@ -339,7 +302,7 @@ function initDashboard() {
         e.preventDefault();
         if (!dragging || dragging === el) return;
         const rect = el.getBoundingClientRect();
-        const mid  = rect.top + rect.height / 2;
+        const mid = rect.top + rect.height / 2;
         if (e.clientY < mid) container.insertBefore(dragging, el);
         else container.insertBefore(dragging, el.nextSibling);
       });
@@ -359,7 +322,6 @@ function initDashboard() {
 
   document.getElementById('add-gallery-btn').addEventListener('click', function() { openModal('gallery'); });
 
-  /* ── EXHIBITIONS ── */
   let currentExTab = 'group';
   document.querySelectorAll('.ex-tab-btn').forEach(function(btn) {
     btn.addEventListener('click', function() {
@@ -381,15 +343,15 @@ function initDashboard() {
     const items = data[tab] || [];
     const c = document.getElementById('exlist-' + tab);
     if (!items.length) { c.innerHTML = '<p class="empty-msg">None yet.</p>'; return; }
-    c.innerHTML = items.map(function(e) { return (
-      '<div class="card-item" data-id="' + esc(e._id) + '" data-tab="' + esc(tab) + '" data-type="exhibition">' +
+    c.innerHTML = items.map(function(e) {
+      return '<div class="card-item" data-id="' + esc(e._id) + '" data-tab="' + esc(tab) + '" data-type="exhibition">' +
         '<div style="flex:1"><h6>' + esc(e.title) + '</h6>' +
         '<small>' + esc(e.year) + ' · ' + esc(e.venue) + '</small></div>' +
         '<div class="d-flex gap-1">' +
           '<button class="btn-icon text-primary action-edit" aria-label="Edit"><i class="bi bi-pencil-square"></i></button>' +
           '<button class="btn-icon text-danger action-del" aria-label="Delete"><i class="bi bi-trash"></i></button>' +
-        '</div></div>'
-    ); }).join('');
+        '</div></div>';
+    }).join('');
   }
 
   document.querySelectorAll('.add-ex-btn').forEach(function(btn) {
@@ -414,7 +376,6 @@ function initDashboard() {
     bsModal.show();
   }
 
-  /* ── DYNAMIC LISTS (events, projects, press) ── */
   const listForms = {
     events: { title:'Event', fields:[
       {id:'title',label:'Event Title',type:'text',required:true,max:200},
@@ -448,32 +409,29 @@ function initDashboard() {
     const items = await apiFetch('/api/' + section).then(function(r) { return r.json(); });
     const c = document.getElementById(section + '-list');
     if (!items.length) { c.innerHTML = '<p class="empty-msg">No ' + esc(section) + ' yet.</p>'; return; }
-    c.innerHTML = items.map(function(item) { return (
-      '<div class="card-item" data-id="' + esc(item._id) + '" data-type="' + esc(section) + '">' +
+    c.innerHTML = items.map(function(item) {
+      return '<div class="card-item" data-id="' + esc(item._id) + '" data-type="' + esc(section) + '">' +
         (item.image ? '<img src="' + esc(item.image) + '" class="thumb" alt="">' : '') +
         '<div style="flex:1"><h6>' + esc(item.title) + '</h6>' +
         '<small>' + (item.date ? esc(fmt(item.date)) + ' · ' : '') + esc(item.publication || item.medium || item.location || '') + '</small></div>' +
         '<div class="d-flex gap-1">' +
           '<button class="btn-icon text-primary action-edit" aria-label="Edit"><i class="bi bi-pencil-square"></i></button>' +
           '<button class="btn-icon text-danger action-del" aria-label="Delete"><i class="bi bi-trash"></i></button>' +
-        '</div></div>'
-    ); }).join('');
+        '</div></div>';
+    }).join('');
   }
 
   document.getElementById('add-events-btn').addEventListener('click', function() { openModal('events'); });
   document.getElementById('add-projects-btn').addEventListener('click', function() { openModal('projects'); });
   document.getElementById('add-press-btn').addEventListener('click', function() { openModal('press'); });
 
-  /* ── Delegated edit/delete ── */
   document.addEventListener('click', async function(e) {
     const editBtn = e.target.closest('.action-edit');
     const delBtn  = e.target.closest('.action-del');
     if (!editBtn && !delBtn) return;
     const card = (editBtn || delBtn).closest('.card-item');
     if (!card) return;
-    const id   = card.dataset.id;
-    const type = card.dataset.type;
-    const tab  = card.dataset.tab;
+    const id = card.dataset.id, type = card.dataset.type, tab = card.dataset.tab;
     if (editBtn) {
       if (type === 'exhibition') openExModal(tab, id);
       else openModal(type, id);
@@ -491,7 +449,6 @@ function initDashboard() {
     }
   });
 
-  /* ── Gallery + list modal ── */
   const galleryFields = [
     {id:'title',label:'Title',type:'text',required:true,max:200},
     {id:'medium',label:'Medium',type:'text',max:120},
@@ -513,63 +470,46 @@ function initDashboard() {
     }
     document.getElementById('modalBody').innerHTML = config.fields.map(function(f) {
       if (f.type === 'file') {
-        const currentSrc = existing.image || existing.file || '';
-        return (
-          '<div class="mb-3">' +
-          '<label class="form-label fw-semibold" style="font-size:.85rem">' + esc(f.label) + '</label>' +
-          '<div id="drop-zone" style="border:2px dashed #ccc;border-radius:8px;padding:1.5rem;text-align:center;cursor:pointer;transition:border-color .2s;background:#fafafa">' +
-            (currentSrc ? '<img id="upload-preview" src="' + esc(currentSrc) + '" style="max-height:120px;border-radius:6px;object-fit:cover;margin-bottom:.75rem;display:block;margin-left:auto;margin-right:auto">' : '<img id="upload-preview" style="max-height:120px;border-radius:6px;object-fit:cover;margin-bottom:.75rem;display:none;margin-left:auto;margin-right:auto">') +
-            '<p id="drop-label" style="margin:0;color:#888;font-size:.82rem">' + (currentSrc ? 'Drop new image or click to replace' : '<i class="bi bi-cloud-upload" style="font-size:1.5rem;display:block;margin-bottom:.4rem"></i>Drop image here or click to browse') + '</p>' +
+        const cur = existing.image || existing.file || '';
+        return '<div class="mb-3"><label class="form-label fw-semibold" style="font-size:.85rem">' + esc(f.label) + '</label>' +
+          '<div id="drop-zone" style="border:2px dashed #ccc;border-radius:8px;padding:1.5rem;text-align:center;cursor:pointer;background:#fafafa">' +
+            (cur ? '<img id="upload-preview" src="' + esc(cur) + '" style="max-height:120px;border-radius:6px;object-fit:cover;margin-bottom:.75rem;display:block;margin:0 auto .75rem">' :
+                   '<img id="upload-preview" style="max-height:120px;display:none;margin:0 auto .75rem">') +
+            '<p id="drop-label" style="margin:0;color:#888;font-size:.82rem">' + (cur ? 'Drop new image or click to replace' : '<i class="bi bi-cloud-upload" style="font-size:1.5rem;display:block;margin-bottom:.4rem"></i>Drop image here or click to browse') + '</p>' +
           '</div>' +
-          '<input type="file" id="f_image" accept="image/*" style="display:none">' +
-          '</div>');
+          '<input type="file" id="f_image" accept="image/*" style="display:none"></div>';
       }
-      if (f.type === 'textarea') return (
-        '<div class="mb-3"><label class="form-label fw-semibold" style="font-size:.85rem">' + esc(f.label) + (f.required ? ' <span class="text-danger">*</span>' : '') + '</label>' +
-        '<textarea class="form-control" id="f_' + esc(f.id) + '" rows="3" maxlength="' + (f.max||2000) + '">' + esc(existing[f.id] || '') + '</textarea></div>');
-      return (
-        '<div class="mb-3"><label class="form-label fw-semibold" style="font-size:.85rem">' + esc(f.label) + (f.required ? ' <span class="text-danger">*</span>' : '') + '</label>' +
-        '<input type="' + esc(f.type) + '" class="form-control" id="f_' + esc(f.id) + '" value="' + esc(existing[f.id] || '') + '"' + (f.max ? ' maxlength="' + f.max + '"' : '') + (f.required ? ' required' : '') + '></div>');
+      if (f.type === 'textarea') {
+        return '<div class="mb-3"><label class="form-label fw-semibold" style="font-size:.85rem">' + esc(f.label) + (f.required ? ' <span class="text-danger">*</span>' : '') + '</label>' +
+          '<textarea class="form-control" id="f_' + esc(f.id) + '" rows="3" maxlength="' + (f.max||2000) + '">' + esc(existing[f.id] || '') + '</textarea></div>';
+      }
+      return '<div class="mb-3"><label class="form-label fw-semibold" style="font-size:.85rem">' + esc(f.label) + (f.required ? ' <span class="text-danger">*</span>' : '') + '</label>' +
+        '<input type="' + esc(f.type) + '" class="form-control" id="f_' + esc(f.id) + '" value="' + esc(existing[f.id] || '') + '"' + (f.max ? ' maxlength="' + f.max + '"' : '') + (f.required ? ' required' : '') + '></div>';
     }).join('');
-
-    // Wire up drop zone
     const dropZone = document.getElementById('drop-zone');
     const fileInput = document.getElementById('f_image');
     if (dropZone && fileInput) {
       dropZone.addEventListener('click', function() { fileInput.click(); });
       dropZone.addEventListener('dragover', function(e) { e.preventDefault(); dropZone.style.borderColor = '#c9a84c'; });
       dropZone.addEventListener('dragleave', function() { dropZone.style.borderColor = '#ccc'; });
-      dropZone.addEventListener('drop', function(e) {
-        e.preventDefault(); dropZone.style.borderColor = '#ccc';
-        const file = e.dataTransfer.files[0];
-        if (file) handleImageFile(file);
-      });
-      fileInput.addEventListener('change', function() {
-        if (fileInput.files[0]) handleImageFile(fileInput.files[0]);
-      });
+      dropZone.addEventListener('drop', function(e) { e.preventDefault(); dropZone.style.borderColor = '#ccc'; if (e.dataTransfer.files[0]) handleImageFile(e.dataTransfer.files[0]); });
+      fileInput.addEventListener('change', function() { if (fileInput.files[0]) handleImageFile(fileInput.files[0]); });
     }
-
     function handleImageFile(file) {
       if (!file.type.startsWith('image/')) { alert('Please select an image file.'); return; }
       if (file.size > 10*1024*1024) { alert('Image must be under 10 MB.'); return; }
       const reader = new FileReader();
-      reader.onload = function(e) {
+      reader.onload = function(ev) {
         const preview = document.getElementById('upload-preview');
-        preview.src = e.target.result;
-        preview.style.display = 'block';
+        preview.src = ev.target.result; preview.style.display = 'block';
         document.getElementById('drop-label').textContent = file.name + ' (' + (file.size/1024).toFixed(0) + ' KB)';
-        // Transfer to real file input
-        const dt = new DataTransfer();
-        dt.items.add(file);
-        fileInput.files = dt.files;
+        const dt = new DataTransfer(); dt.items.add(file); fileInput.files = dt.files;
       };
       reader.readAsDataURL(file);
     }
-
     bsModal.show();
   }
 
-  /* ── Save modal ── */
   document.getElementById('modalSave').addEventListener('click', async function() {
     if (!modalContext) return;
     const { type, tab, id } = modalContext;
@@ -612,77 +552,48 @@ function initDashboard() {
     if (isGallery) loadGallery(); else loadList(type);
   });
 
-  /* ── CHANGE PASSWORD ── */
   function initPasswordSection() {
     makeToggle('currentPw', 'toggleCurrentPw');
     makeToggle('newPw', 'toggleNewPw');
     makeToggle('confirmPw', 'toggleConfirmPw');
-
-    document.getElementById('newPw').addEventListener('input', function() {
-      checkStrength(this.value);
-    });
-
-    /* Remove old listener by replacing the button */
+    document.getElementById('newPw').addEventListener('input', function() { checkStrength(this.value); });
     const oldBtn = document.getElementById('changePwBtn');
     const newBtn = oldBtn.cloneNode(true);
     oldBtn.parentNode.replaceChild(newBtn, oldBtn);
-
     newBtn.addEventListener('click', async function() {
-      const currentPwEl = document.getElementById('currentPw');
-      const newPwEl     = document.getElementById('newPw');
-      const confirmPwEl = document.getElementById('confirmPw');
-      const current  = currentPwEl.value;
-      const newPw    = newPwEl.value;
-      const confirm  = confirmPwEl.value;
+      const current  = document.getElementById('currentPw').value;
+      const newPw    = document.getElementById('newPw').value;
+      const confirm  = document.getElementById('confirmPw').value;
       const msg = document.getElementById('pw-msg');
-
-      function showErr(text) {
-        msg.textContent = text;
-        msg.className = 'mt-2 small text-danger';
-        msg.style.display = 'block';
-      }
-
-      if (!current)          { showErr('Enter your current password'); return; }
-      if (newPw !== confirm)  { showErr('Passwords do not match'); return; }
-      if (newPw.length < 8)   { showErr('Password must be at least 8 characters'); return; }
-      if (!/[A-Z]/.test(newPw) || !/[0-9]/.test(newPw)) {
-        showErr('Password must contain at least one uppercase letter and one number'); return;
-      }
-
-      /* Verify current password first */
-      const loginRes = await fetch('/api/login', {
+      function showErr(text) { msg.textContent = text; msg.className = 'mt-2 small text-danger'; msg.style.display = 'block'; }
+      if (!current) { showErr('Enter your current password'); return; }
+      if (!newPw)   { showErr('Enter a new password'); return; }
+      if (newPw.length < 8) { showErr('Password must be at least 8 characters'); return; }
+      if (!/[A-Z]/.test(newPw)) { showErr('Password must contain at least one uppercase letter'); return; }
+      if (!/[0-9]/.test(newPw)) { showErr('Password must contain at least one number'); return; }
+      if (newPw !== confirm) { showErr('Passwords do not match'); return; }
+      const verifyRes = await fetch('/api/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ password: current })
       });
-      if (!loginRes.ok) { showErr('Current password is wrong'); return; }
-
+      if (!verifyRes.ok) { showErr('Current password is incorrect'); return; }
       const res = await apiFetch('/api/change-password', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ newPassword: newPw })
       });
-
-      currentPwEl.value = '';
-      newPwEl.value = '';
-      confirmPwEl.value = '';
-
       if (res.ok) {
         msg.textContent = 'Password updated! Logging you out…';
         msg.className = 'mt-2 small text-success';
         msg.style.display = 'block';
-        setTimeout(function() {
-          store.removeItem('adminToken');
-          location.reload();
-        }, 2000);
+        setTimeout(function() { store.removeItem('adminToken'); location.reload(); }, 2000);
       } else {
         const d = await res.json().catch(function() { return {}; });
         showErr(d.message || 'Failed to update password');
       }
     });
   }
-
-} /* end initDashboard */
 
   /* ── COMMENTS ── */
   let currentCommentFilter = 'pending';
@@ -692,10 +603,7 @@ function initDashboard() {
       const all = await apiFetch('/api/admin/comments').then(r => r.json());
       const pending = all.filter(c => !c.approved).length;
       const badge = document.getElementById('nav-pending-badge');
-      if (badge) {
-        badge.textContent = pending;
-        badge.style.display = pending > 0 ? 'inline' : 'none';
-      }
+      if (badge) { badge.textContent = pending; badge.style.display = pending > 0 ? 'inline' : 'none'; }
     } catch {}
   }
 
@@ -704,64 +612,49 @@ function initDashboard() {
     const pending = all.filter(c => !c.approved).length;
     const pendingEl = document.getElementById('pending-count');
     if (pendingEl) pendingEl.textContent = pending + ' pending';
-
-    document.querySelectorAll('.comment-filter-btn').forEach(btn => {
+    document.querySelectorAll('.comment-filter-btn').forEach(function(btn) {
       btn.addEventListener('click', function() {
-        document.querySelectorAll('.comment-filter-btn').forEach(b => b.classList.remove('active'));
+        document.querySelectorAll('.comment-filter-btn').forEach(function(b) { b.classList.remove('active'); });
         btn.classList.add('active');
         currentCommentFilter = btn.dataset.filter;
         renderComments(all, currentCommentFilter);
       });
     });
-
     renderComments(all, currentCommentFilter);
   }
 
   function renderComments(all, filter) {
     const c = document.getElementById('comments-list');
     let items = all;
-    if (filter === 'pending') items = all.filter(c => !c.approved);
+    if (filter === 'pending')  items = all.filter(c => !c.approved);
     if (filter === 'approved') items = all.filter(c => c.approved);
-
-    if (!items.length) {
-      c.innerHTML = '<p class="empty-msg">No ' + filter + ' comments.</p>';
-      return;
-    }
-
+    if (!items.length) { c.innerHTML = '<p class="empty-msg">No ' + filter + ' comments.</p>'; return; }
     c.innerHTML = items.map(function(cm) {
-      const date = new Date(cm.createdAt).toLocaleDateString('en-GB', {day:'numeric',month:'short',year:'numeric'});
-      return (
-        '<div class="card-item" style="flex-direction:column;align-items:stretch;gap:.5rem">' +
-          '<div class="d-flex justify-content-between align-items-start">' +
-            '<div>' +
-              '<strong style="font-size:.88rem">' + esc(cm.name) + '</strong>' +
-              '<span class="ms-2 badge ' + (cm.approved ? 'bg-success' : 'bg-warning text-dark') + '">' + (cm.approved ? 'Approved' : 'Pending') + '</span>' +
-            '</div>' +
-            '<small class="text-muted">' + esc(date) + '</small>' +
-          '</div>' +
-          '<small class="text-muted">On: <em>' + esc(cm.artworkTitle || cm.artworkId) + '</em></small>' +
-          '<p style="font-size:.85rem;margin:0;color:#444">' + esc(cm.message) + '</p>' +
-          '<div class="d-flex gap-2 mt-1">' +
-            (!cm.approved ? '<button class="btn btn-sm btn-success comment-approve" data-id="' + esc(cm._id) + '">Approve</button>' : '') +
-            '<button class="btn btn-sm btn-outline-danger comment-delete" data-id="' + esc(cm._id) + '">Delete</button>' +
-          '</div>' +
-        '</div>'
-      );
+      const date = new Date(cm.createdAt).toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'});
+      return '<div class="card-item" style="flex-direction:column;align-items:stretch;gap:.5rem">' +
+        '<div class="d-flex justify-content-between align-items-start">' +
+          '<div><strong style="font-size:.88rem">' + esc(cm.name) + '</strong>' +
+          '<span class="ms-2 badge ' + (cm.approved ? 'bg-success' : 'bg-warning text-dark') + '">' + (cm.approved ? 'Approved' : 'Pending') + '</span></div>' +
+          '<small class="text-muted">' + esc(date) + '</small>' +
+        '</div>' +
+        '<small class="text-muted">On: <em>' + esc(cm.artworkTitle || cm.artworkId) + '</em></small>' +
+        '<p style="font-size:.85rem;margin:0;color:#444">' + esc(cm.message) + '</p>' +
+        '<div class="d-flex gap-2 mt-1">' +
+          (!cm.approved ? '<button class="btn btn-sm btn-success comment-approve" data-id="' + esc(cm._id) + '">Approve</button>' : '') +
+          '<button class="btn btn-sm btn-outline-danger comment-delete" data-id="' + esc(cm._id) + '">Delete</button>' +
+        '</div></div>';
     }).join('');
-
-    c.querySelectorAll('.comment-approve').forEach(btn => {
+    c.querySelectorAll('.comment-approve').forEach(function(btn) {
       btn.addEventListener('click', async function() {
         await apiFetch('/api/admin/comments/' + btn.dataset.id + '/approve', { method: 'PUT' });
-        loadComments();
-        loadPendingCount();
+        loadComments(); loadPendingCount();
       });
     });
-    c.querySelectorAll('.comment-delete').forEach(btn => {
+    c.querySelectorAll('.comment-delete').forEach(function(btn) {
       btn.addEventListener('click', async function() {
         if (!confirm('Delete this comment?')) return;
         await apiFetch('/api/admin/comments/' + btn.dataset.id, { method: 'DELETE' });
-        loadComments();
-        loadPendingCount();
+        loadComments(); loadPendingCount();
       });
     });
   }

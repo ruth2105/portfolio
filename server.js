@@ -224,10 +224,12 @@ app.get('/api/reset-admin-password', async (req, res) => {
   res.json({ success: true, message: 'Password reset to default: Estif@2025' });
 });
 
-// Protect all write API routes
+// Protect all write API routes (public comment posting is exempt)
 app.use('/api', (req, res, next) => {
   if (req.method === 'GET') return next();
   if (['/login', '/logout'].includes(req.path)) return next();
+  // Public: POST /api/comments/:artworkId
+  if (req.method === 'POST' && req.path.startsWith('/comments/')) return next();
   requireAuth(req, res, next);
 });
 
@@ -369,18 +371,23 @@ app.get('/api/comments/:artworkId', async (req, res) => {
 
 // Post a new comment (public — goes to moderation queue)
 app.post('/api/comments/:artworkId', async (req, res) => {
-  const { name, message, artworkTitle } = req.body;
-  if (!name || !message) return res.status(400).json({ message: 'Name and message required' });
-  if (name.length > 80) return res.status(400).json({ message: 'Name too long' });
-  if (message.length > 600) return res.status(400).json({ message: 'Message too long' });
-  const comment = await Comment.create({
-    artworkId: req.params.artworkId,
-    artworkTitle: artworkTitle || '',
-    name: name.trim(),
-    message: message.trim(),
-    approved: false
-  });
-  res.json({ success: true, message: 'Comment submitted for review' });
+  try {
+    const { name, message, artworkTitle } = req.body;
+    if (!name || !message) return res.status(400).json({ message: 'Name and message required' });
+    if (name.length > 80) return res.status(400).json({ message: 'Name too long' });
+    if (message.length > 600) return res.status(400).json({ message: 'Message too long' });
+    await Comment.create({
+      artworkId: req.params.artworkId,
+      artworkTitle: artworkTitle || '',
+      name: name.trim(),
+      message: message.trim(),
+      approved: false
+    });
+    res.json({ success: true, message: 'Comment submitted for review' });
+  } catch (err) {
+    console.error('Comment post error:', err);
+    res.status(500).json({ message: 'Server error. Please try again.' });
+  }
 });
 
 // Admin: get all comments (pending + approved)

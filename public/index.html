@@ -84,9 +84,9 @@
       <li><a href="#statement" class="nav-link">Statement</a></li>
       <li><a href="#about" class="nav-link">About</a></li>
       <li><a href="#exhibitions" class="nav-link">Exhibitions</a></li>
-      <li id="nav-upcoming-li" style="display:none"><a href="#upcoming" class="nav-link">Events</a></li>
       <li id="nav-projects-li" style="display:none"><a href="#projects" class="nav-link">Projects</a></li>
       <li><a href="#press" class="nav-link">Press</a></li>
+      <li id="nav-upcoming-li"><a href="#upcoming" class="nav-link">Events</a></li>
       <li><a href="#contact" class="nav-link">Contact</a></li>
     </ul>
     <div class="nav-right">
@@ -129,14 +129,16 @@
   <!-- STATEMENT -->
   <section id="statement" class="statement">
     <div class="statement-inner">
+      <div class="statement-image-col">
+        <div class="statement-img-wrap">
+          <img src="/images/20260125_125225.jpg" alt="Artist at work" class="statement-img reveal">
+        </div>
+      </div>
       <div class="statement-text-col">
         <span class="section-label reveal">Voice</span>
         <h2 class="section-heading reveal reveal-delay-1">Artist<br><em>Statement</em></h2>
+        <blockquote class="statement-quote reveal reveal-delay-2" id="statement-quote"></blockquote>
         <div class="statement-body" id="statement-body"></div>
-      </div>
-      <div class="statement-image-col">
-        <img src="/images/20260125_125225.jpg" alt="Artist at work" class="statement-img reveal">
-        <blockquote class="statement-quote reveal" id="statement-quote"></blockquote>
       </div>
     </div>
   </section>
@@ -171,13 +173,6 @@
     <div class="ex-panel" id="tab-workshops"><ul class="ex-list" id="exlist-workshops"></ul></div>
   </section>
 
-  <!-- UPCOMING EVENTS -->
-  <section id="upcoming" class="exhibitions" style="display:none">
-    <span class="section-label reveal">What's Next</span>
-    <h2 class="section-heading reveal reveal-delay-1">Upcoming<br><em>Events</em></h2>
-    <ul class="ex-list" id="dynamic-events"></ul>
-  </section>
-
   <!-- PROJECTS -->
   <section id="projects" class="exhibitions" style="display:none">
     <span class="section-label reveal">Work</span>
@@ -190,6 +185,19 @@
     <span class="section-label reveal">Recognition</span>
     <h2 class="section-heading reveal reveal-delay-1">Press &amp;<br><em>Publications</em></h2>
     <div class="press-grid" id="press-grid"></div>
+  </section>
+
+  <!-- UPCOMING EVENTS -->
+  <section id="upcoming" class="upcoming-events">
+    <div class="upcoming-inner">
+      <div class="upcoming-header">
+        <span class="section-label reveal">What's Next</span>
+        <h2 class="section-heading reveal reveal-delay-1">Upcoming<br><em>Events</em></h2>
+      </div>
+      <div class="upcoming-grid" id="dynamic-events">
+        <!-- populated by JS -->
+      </div>
+    </div>
   </section>
 
   <!-- CONTACT -->
@@ -330,20 +338,39 @@
       dimensions: item.dataset.dimensions || '',
       year: item.dataset.year || ''
     }));
+
+    // expose to script.js comment handler
+    window._galleryImages = images;
+    window._galleryCurrent = 0;
+
+    function openLightbox(i) {
+      window._galleryCurrent = i;
+      const d = images[i];
+      const lightbox = document.getElementById('lightbox');
+      document.getElementById('lightboxImg').src = d.src;
+      document.getElementById('lightboxImg').alt = d.title;
+      document.getElementById('lightboxTitle').textContent = d.title;
+      document.getElementById('lightboxMedium').textContent = d.medium;
+      document.getElementById('lightboxDimensions').textContent = d.dimensions;
+      document.getElementById('lightboxYear').textContent = d.year;
+      lightbox.classList.add('active');
+      document.body.style.overflow = 'hidden';
+      history.pushState({ lightbox: true }, '');
+      // load comments for this artwork
+      window.loadLightboxComments(d.id || '');
+    }
+
     items.forEach((item, i) => {
-      item.addEventListener('click', () => {
-        const lightbox = document.getElementById('lightbox');
-        const d = images[i];
-        document.getElementById('lightboxImg').src = d.src;
-        document.getElementById('lightboxImg').alt = d.title;
-        document.getElementById('lightboxTitle').textContent = d.title;
-        document.getElementById('lightboxMedium').textContent = d.medium;
-        document.getElementById('lightboxDimensions').textContent = d.dimensions;
-        document.getElementById('lightboxYear').textContent = d.year;
-        lightbox.classList.add('active');
-        document.body.style.overflow = 'hidden';
-      });
+      item.addEventListener('click', () => openLightbox(i));
     });
+
+    // nav arrows (prev/next) — wire up here where images array is in scope
+    document.getElementById('lightboxPrev').onclick = () => {
+      openLightbox((window._galleryCurrent - 1 + images.length) % images.length);
+    };
+    document.getElementById('lightboxNext').onclick = () => {
+      openLightbox((window._galleryCurrent + 1) % images.length);
+    };
 
     // STATEMENT
     document.getElementById('statement-body').innerHTML =
@@ -402,23 +429,29 @@
     });
 
     // UPCOMING EVENTS
+    const eventsGrid = document.getElementById('dynamic-events');
     if (events.length) {
-      document.getElementById('dynamic-events').innerHTML = events.map(e => `
-        <li style="display:block;padding:0;margin-bottom:2rem;border:none">
-          <div style="display:grid;grid-template-columns:${e.image ? '1fr 1fr' : '1fr'};gap:2rem;align-items:start;background:rgba(255,255,255,0.03);border-radius:12px;padding:1.5rem;border:1px solid rgba(255,255,255,0.07)">
-            ${e.image ? `<img src="${e.image}" style="width:100%;border-radius:8px;object-fit:cover;max-height:280px">` : ''}
-            <div>
-              <p style="font-size:.75rem;letter-spacing:.12em;text-transform:uppercase;opacity:.5;margin-bottom:.4rem">${fmt(e.date)}</p>
-              <h3 style="font-size:1.4rem;font-weight:600;margin-bottom:.5rem;line-height:1.3">${e.title}</h3>
-              ${e.location ? `<p style="font-size:.85rem;opacity:.6;margin-bottom:.75rem"><i class="bi bi-geo-alt"></i> ${e.location}</p>` : ''}
-              ${e.description ? `<p style="font-size:.9rem;line-height:1.7;opacity:.8;margin-bottom:1rem">${e.description}</p>` : ''}
-              ${e.link ? `<a href="${e.link}" target="_blank" style="display:inline-flex;align-items:center;gap:.4rem;font-size:.85rem;padding:.5rem 1.1rem;border:1px solid currentColor;border-radius:4px;text-decoration:none;opacity:.8">More info <i class="bi bi-arrow-up-right"></i></a>` : ''}
-            </div>
+      eventsGrid.innerHTML = events.map(e => `
+        <article class="event-card reveal">
+          ${e.image ? `<div class="event-img-wrap"><img src="${e.image}" alt="${e.title}" loading="lazy"></div>` : ''}
+          <div class="event-body">
+            <time class="event-date">${fmt(e.date)}</time>
+            <h3 class="event-title">${e.title}</h3>
+            ${e.location ? `<p class="event-location"><i class="bi bi-geo-alt"></i> ${e.location}</p>` : ''}
+            ${e.description ? `<p class="event-desc">${e.description}</p>` : ''}
+            ${e.link ? `<a href="${e.link}" target="_blank" rel="noopener" class="event-link">More info <i class="bi bi-arrow-up-right"></i></a>` : ''}
           </div>
-        </li>`).join('');
-      document.getElementById('upcoming').style.display = '';
-      document.getElementById('nav-upcoming-li').style.display = '';
+        </article>`).join('');
+    } else {
+      eventsGrid.innerHTML = `
+        <div class="event-empty">
+          <i class="bi bi-calendar3"></i>
+          <p>No upcoming events at the moment.</p>
+          <span>Check back soon for exhibitions, workshops, and more.</span>
+        </div>`;
     }
+    // Observe newly added event cards
+    document.querySelectorAll('#dynamic-events .reveal').forEach(el => revealObserver.observe(el));
 
     // PROJECTS
     if (projects.length) {
