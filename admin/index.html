@@ -14,26 +14,21 @@
     .sidebar h4 { color:#fff; padding:1rem 1.2rem .1rem; margin:0; font-size:1rem; }
     .sidebar .sub { color:#666; padding:0 1.2rem .6rem; font-size:.75rem; }
     .sidebar .nav-link { color:#aaa; padding:.7rem 1.2rem; display:flex; align-items:center; gap:.5rem; border-radius:0; font-size:.85rem; }
-    .sidebar .nav-link:hover,.sidebar .nav-link.active { background:#222; color:#fff; }
+    .sidebar .nav-link:hover, .sidebar .nav-link.active { background:#222; color:#fff; }
     .sidebar hr { border-color:#222; margin:.3rem 1rem; }
 
-    /* Desktop: sticky full-height sidebar */
     @media (min-width: 768px) {
       .sidebar { min-height:100vh; position:sticky; top:0; height:100vh; overflow-y:auto; }
+      .sidebar-toggle { display:none; }
+      .sidebar-nav { display:block !important; }
     }
-
-    /* Mobile: top bar + collapsible menu */
     @media (max-width: 767px) {
       .sidebar { position:relative; }
       .sidebar-toggle { display:flex; align-items:center; justify-content:space-between; padding:.8rem 1.2rem; cursor:pointer; }
       .sidebar-toggle span { color:#fff; font-weight:600; font-size:.95rem; }
       .sidebar-nav { display:none; }
       .sidebar-nav.open { display:block; }
-      .main-col { padding: 1rem !important; }
-    }
-    @media (min-width: 768px) {
-      .sidebar-toggle { display:none; }
-      .sidebar-nav { display:block !important; }
+      .main-col { padding:1rem !important; }
     }
 
     /* ── Content ── */
@@ -48,28 +43,38 @@
     .thumb { width:56px; height:56px; object-fit:cover; border-radius:6px; flex-shrink:0; }
     .section-title { font-size:1rem; font-weight:600; margin-bottom:1rem; }
     textarea.form-control { resize:vertical; }
+    #loginBtn:disabled { opacity:.5; cursor:not-allowed; }
   </style>
 </head>
 <body>
 
-<!-- Login Screen -->
+<!-- ── Login Screen ── -->
 <div id="loginScreen" style="min-height:100vh;background:#111;display:flex;align-items:center;justify-content:center;">
   <div style="background:#1a1a1a;padding:2rem;border-radius:12px;width:100%;max-width:360px;">
     <h4 style="color:#fff;text-align:center;margin-bottom:.25rem;">Admin Panel</h4>
     <p style="color:#666;text-align:center;font-size:.8rem;margin-bottom:1.5rem;">Estifanos Solomon</p>
-    <input type="password" id="adminPassword" class="form-control mb-3" placeholder="Enter password" style="background:#222;border-color:#333;color:#fff;">
+    <div class="input-group mb-3">
+      <input type="password" id="adminPassword" class="form-control"
+             placeholder="Enter password" autocomplete="current-password"
+             style="background:#222;border-color:#333;color:#fff;" maxlength="128">
+      <button class="btn btn-outline-secondary" type="button" id="loginTogglePw" tabindex="-1"
+              style="background:#333;border-color:#333;color:#aaa;">
+        <i class="bi bi-eye"></i>
+      </button>
+    </div>
     <button class="btn btn-light w-100" id="loginBtn">Login</button>
-    <p id="loginError" class="text-danger text-center mt-2 small" style="display:none">Wrong password</p>
+    <p id="loginError" class="text-danger text-center mt-2 small" style="display:none" role="alert"></p>
+    <p id="lockoutMsg" class="text-warning text-center mt-2 small" style="display:none" role="alert"></p>
   </div>
 </div>
 
-<!-- Admin Dashboard -->
+<!-- ── Admin Dashboard ── -->
 <div id="adminDashboard" style="display:none">
 <div class="container-fluid p-0">
   <div class="row g-0">
 
     <div class="col-md-2 sidebar">
-      <div class="sidebar-toggle" id="sidebarToggle">
+      <div class="sidebar-toggle" id="sidebarToggle" role="button" tabindex="0" aria-label="Toggle navigation">
         <span><i class="bi bi-list me-2"></i>Admin Panel</span>
         <i class="bi bi-chevron-down text-secondary" id="toggleIcon"></i>
       </div>
@@ -86,7 +91,9 @@
           <hr>
           <a class="nav-link" href="#" data-section="password"><i class="bi bi-key"></i> Change Password</a>
           <hr>
-          <a class="nav-link" href="/" target="_blank"><i class="bi bi-box-arrow-up-right"></i> View Portfolio</a>
+          <a class="nav-link" href="/" target="_blank" rel="noopener noreferrer"><i class="bi bi-box-arrow-up-right"></i> View Portfolio</a>
+          <hr>
+          <a class="nav-link text-danger" href="#" id="logoutBtn"><i class="bi bi-box-arrow-left"></i> Logout</a>
         </nav>
       </div>
     </div>
@@ -96,78 +103,83 @@
       <!-- SITE SETTINGS -->
       <div id="site" class="section active">
         <p class="section-title">Site Settings</p>
-        <form id="site-form" enctype="multipart/form-data">
+        <form id="site-form" enctype="multipart/form-data" novalidate>
           <div class="row g-3">
             <div class="col-md-6">
               <label class="form-label">Artist Name</label>
-              <input type="text" class="form-control" name="name">
+              <input type="text" class="form-control" name="name" maxlength="120">
             </div>
             <div class="col-md-6">
               <label class="form-label">Name in Amharic</label>
-              <input type="text" class="form-control" name="nameAmharic">
+              <input type="text" class="form-control" name="nameAmharic" maxlength="120">
             </div>
             <div class="col-md-6">
               <label class="form-label">Title (e.g. Visual Artist · Printmaker)</label>
-              <input type="text" class="form-control" name="title">
+              <input type="text" class="form-control" name="title" maxlength="200">
             </div>
             <div class="col-md-6">
               <label class="form-label">Location</label>
-              <input type="text" class="form-control" name="location">
+              <input type="text" class="form-control" name="location" maxlength="200">
             </div>
             <div class="col-md-6">
               <label class="form-label">Instagram URL</label>
-              <input type="text" class="form-control" name="instagram">
+              <input type="url" class="form-control" name="instagram" maxlength="200">
             </div>
             <div class="col-md-6">
               <label class="form-label">Email</label>
-              <input type="email" class="form-control" name="email">
+              <input type="email" class="form-control" name="email" maxlength="200">
             </div>
             <div class="col-md-6">
               <label class="form-label">Phone</label>
-              <input type="text" class="form-control" name="phone">
+              <input type="tel" class="form-control" name="phone" maxlength="30">
             </div>
             <div class="col-12">
               <label class="form-label">Hero Heading</label>
-              <input type="text" class="form-control" name="heroHeading">
+              <input type="text" class="form-control" name="heroHeading" maxlength="200">
             </div>
             <div class="col-12">
               <label class="form-label">Hero Quote</label>
-              <input type="text" class="form-control" name="heroQuote">
+              <input type="text" class="form-control" name="heroQuote" maxlength="400">
             </div>
             <div class="col-md-6">
               <label class="form-label">Hero Image (current: <span id="hero-img-name"></span>)</label>
               <input type="file" class="form-control" name="heroImageFile" accept="image/*" id="heroImageFile">
               <small class="text-muted">Or enter path manually:</small>
-              <input type="text" class="form-control mt-1" name="heroImage" id="heroImagePath">
+              <input type="text" class="form-control mt-1" name="heroImage" id="heroImagePath" maxlength="300">
             </div>
             <div class="col-md-6">
               <label class="form-label">About / Profile Photo</label>
               <div id="about-img-preview" class="mb-2"></div>
               <input type="file" class="form-control" name="aboutImage" accept="image/*">
             </div>
+            <div class="col-md-6">
+              <label class="form-label">CV / Resume <small class="text-muted">(PDF — shows download button on site)</small></label>
+              <div id="cv-file-current" class="mb-1"></div>
+              <input type="file" class="form-control" name="cvFile" accept=".pdf,.doc,.docx">
+            </div>
             <div class="col-12">
               <label class="form-label">Contact Note</label>
-              <textarea class="form-control" name="contactNote" rows="2"></textarea>
+              <textarea class="form-control" name="contactNote" rows="2" maxlength="500"></textarea>
             </div>
             <div class="col-12">
-              <label class="form-label">Bio (English) — one paragraph per line</label>
-              <textarea class="form-control" name="bioParagraphsRaw" rows="5" id="bio-en"></textarea>
+              <label class="form-label">Bio (English) — one paragraph per blank line</label>
+              <textarea class="form-control" name="bioParagraphsRaw" rows="5" id="bio-en" maxlength="5000"></textarea>
             </div>
             <div class="col-12">
-              <label class="form-label">Bio (Amharic) — one paragraph per line</label>
-              <textarea class="form-control" name="bioAmharicRaw" rows="4" id="bio-am"></textarea>
+              <label class="form-label">Bio (Amharic) — one paragraph per blank line</label>
+              <textarea class="form-control" name="bioAmharicRaw" rows="4" id="bio-am" maxlength="5000"></textarea>
             </div>
             <div class="col-md-6">
               <label class="form-label">Education — one item per line</label>
-              <textarea class="form-control" name="educationRaw" rows="5" id="edu-raw"></textarea>
+              <textarea class="form-control" name="educationRaw" rows="5" id="edu-raw" maxlength="3000"></textarea>
             </div>
             <div class="col-md-6">
               <label class="form-label">Awards — one item per line</label>
-              <textarea class="form-control" name="awardsRaw" rows="5" id="awards-raw"></textarea>
+              <textarea class="form-control" name="awardsRaw" rows="5" id="awards-raw" maxlength="3000"></textarea>
             </div>
             <div class="col-12">
               <button type="submit" class="btn btn-dark">Save Settings</button>
-              <span id="site-msg" class="ms-3 text-success" style="display:none">Saved!</span>
+              <span id="site-msg" class="ms-3 text-success" style="display:none" aria-live="polite">Saved!</span>
             </div>
           </div>
         </form>
@@ -176,17 +188,17 @@
       <!-- STATEMENT -->
       <div id="statement" class="section">
         <p class="section-title">Artist Statement</p>
-        <form id="statement-form">
+        <form id="statement-form" novalidate>
           <div class="mb-3">
-            <label class="form-label">Paragraphs — one per line</label>
-            <textarea class="form-control" id="stmt-paras" rows="10"></textarea>
+            <label class="form-label">Paragraphs — one per blank line</label>
+            <textarea class="form-control" id="stmt-paras" rows="10" maxlength="10000"></textarea>
           </div>
           <div class="mb-3">
             <label class="form-label">Pull Quote</label>
-            <textarea class="form-control" id="stmt-quote" rows="3"></textarea>
+            <textarea class="form-control" id="stmt-quote" rows="3" maxlength="500"></textarea>
           </div>
           <button type="submit" class="btn btn-dark">Save Statement</button>
-          <span id="stmt-msg" class="ms-3 text-success" style="display:none">Saved!</span>
+          <span id="stmt-msg" class="ms-3 text-success" style="display:none" aria-live="polite">Saved!</span>
         </form>
       </div>
 
@@ -208,15 +220,15 @@
           <button class="btn btn-sm btn-outline-dark ex-tab-btn" data-tab="workshops">Workshops</button>
         </div>
         <div id="ex-group" class="ex-section">
-          <button class="btn btn-dark btn-sm mb-3" onclick="openExModal('group')"><i class="bi bi-plus-lg"></i> Add</button>
+          <button class="btn btn-dark btn-sm mb-3 add-ex-btn" data-tab="group"><i class="bi bi-plus-lg"></i> Add</button>
           <div id="exlist-group"></div>
         </div>
         <div id="ex-solo" class="ex-section" style="display:none">
-          <button class="btn btn-dark btn-sm mb-3" onclick="openExModal('solo')"><i class="bi bi-plus-lg"></i> Add</button>
+          <button class="btn btn-dark btn-sm mb-3 add-ex-btn" data-tab="solo"><i class="bi bi-plus-lg"></i> Add</button>
           <div id="exlist-solo"></div>
         </div>
         <div id="ex-workshops" class="ex-section" style="display:none">
-          <button class="btn btn-dark btn-sm mb-3" onclick="openExModal('workshops')"><i class="bi bi-plus-lg"></i> Add</button>
+          <button class="btn btn-dark btn-sm mb-3 add-ex-btn" data-tab="workshops"><i class="bi bi-plus-lg"></i> Add</button>
           <div id="exlist-workshops"></div>
         </div>
       </div>
@@ -242,7 +254,7 @@
       <!-- PRESS -->
       <div id="press" class="section">
         <div class="d-flex justify-content-between align-items-center mb-3">
-          <p class="section-title mb-0">Press & Interviews</p>
+          <p class="section-title mb-0">Press &amp; Interviews</p>
           <button class="btn btn-dark btn-sm" id="add-press-btn"><i class="bi bi-plus-lg"></i> Add Press</button>
         </div>
         <div id="press-list"></div>
@@ -251,37 +263,49 @@
       <!-- CHANGE PASSWORD -->
       <div id="password" class="section">
         <p class="section-title">Change Password</p>
-        <div style="max-width:360px">
+        <div style="max-width:400px">
           <div class="mb-3">
             <label class="form-label">Current Password</label>
-            <input type="password" class="form-control" id="currentPw">
+            <div class="input-group">
+              <input type="password" class="form-control" id="currentPw" autocomplete="current-password" maxlength="128" placeholder="Enter current password">
+              <button class="btn btn-outline-secondary" type="button" id="toggleCurrentPw" tabindex="-1"><i class="bi bi-eye"></i></button>
+            </div>
           </div>
           <div class="mb-3">
             <label class="form-label">New Password</label>
-            <input type="password" class="form-control" id="newPw">
+            <div class="input-group">
+              <input type="password" class="form-control" id="newPw" autocomplete="new-password" maxlength="128" placeholder="Min 8 chars, 1 uppercase, 1 number">
+              <button class="btn btn-outline-secondary" type="button" id="toggleNewPw" tabindex="-1"><i class="bi bi-eye"></i></button>
+            </div>
+            <div class="mt-2" id="pw-strength-bar" style="height:4px;border-radius:2px;background:#e0e0e0;overflow:hidden">
+              <div id="pw-strength-fill" style="height:100%;width:0;transition:width .3s,background .3s"></div>
+            </div>
+            <small id="pw-strength-label" class="text-muted"></small>
           </div>
           <div class="mb-3">
             <label class="form-label">Confirm New Password</label>
-            <input type="password" class="form-control" id="confirmPw">
+            <div class="input-group">
+              <input type="password" class="form-control" id="confirmPw" autocomplete="new-password" maxlength="128" placeholder="Repeat new password">
+              <button class="btn btn-outline-secondary" type="button" id="toggleConfirmPw" tabindex="-1"><i class="bi bi-eye"></i></button>
+            </div>
           </div>
           <button class="btn btn-dark" id="changePwBtn">Update Password</button>
-          <p id="pw-msg" class="mt-2 small" style="display:none"></p>
+          <p id="pw-msg" class="mt-2 small" style="display:none" role="alert"></p>
         </div>
       </div>
 
     </div>
   </div>
 </div>
-
 </div><!-- end adminDashboard -->
 
 <!-- Generic Modal -->
-<div class="modal fade" id="itemModal" tabindex="-1" aria-hidden="true">
+<div class="modal fade" id="itemModal" tabindex="-1" aria-labelledby="modalTitle" aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered modal-lg">
     <div class="modal-content">
       <div class="modal-header border-0 pb-0">
         <h5 class="modal-title" id="modalTitle">Add Item</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body" id="modalBody"></div>
       <div class="modal-footer border-0 pt-0">
@@ -293,62 +317,6 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-<script>
-  // ── Login ──
-  const savedToken = localStorage.getItem('adminToken');
-  if (savedToken) {
-    // Verify token is still valid
-    fetch('/api/site', { headers: { Authorization: 'Bearer ' + savedToken } })
-      .then(r => {
-        if (r.ok || r.status !== 401) {
-          document.getElementById('loginScreen').style.display = 'none';
-          document.getElementById('adminDashboard').style.display = 'block';
-        } else {
-          localStorage.removeItem('adminToken');
-        }
-      }).catch(() => localStorage.removeItem('adminToken'));
-  }
-
-  document.getElementById('loginBtn').addEventListener('click', async () => {
-    const pw = document.getElementById('adminPassword').value;
-    const res = await fetch('/api/login', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ password: pw })
-    });
-    if (res.ok) {
-      const { token } = await res.json();
-      localStorage.setItem('adminToken', token);
-      document.getElementById('loginScreen').style.display = 'none';
-      document.getElementById('adminDashboard').style.display = 'block';
-      if (window._adminInit) window._adminInit();
-    } else {
-      const data = await res.json();
-      document.getElementById('loginError').textContent = data.message || 'Wrong password';
-      document.getElementById('loginError').style.display = 'block';
-    }
-  });
-
-  document.getElementById('adminPassword').addEventListener('keydown', e => {
-    if (e.key === 'Enter') document.getElementById('loginBtn').click();
-  });
-
-  // Mobile sidebar toggle
-  document.getElementById('sidebarToggle').addEventListener('click', () => {
-    const nav = document.getElementById('sidebarNav');
-    const icon = document.getElementById('toggleIcon');
-    nav.classList.toggle('open');
-    icon.className = nav.classList.contains('open') ? 'bi bi-chevron-up text-secondary' : 'bi bi-chevron-down text-secondary';
-  });
-  document.querySelectorAll('[data-section]').forEach(link => {
-    link.addEventListener('click', () => {
-      if (window.innerWidth < 768) {
-        document.getElementById('sidebarNav').classList.remove('open');
-        document.getElementById('toggleIcon').className = 'bi bi-chevron-down text-secondary';
-      }
-    });
-  });
-</script>
 <script src="/admin/admin.js"></script>
 </body>
 </html>

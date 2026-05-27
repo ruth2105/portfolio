@@ -64,7 +64,27 @@ const storage = multer.diskStorage({
   destination: (req, file, cb) => cb(null, UPLOADS_DIR),
   filename: (req, file, cb) => cb(null, Date.now() + path.extname(file.originalname))
 });
-const upload = multer({ storage, limits: { fileSize: 10 * 1024 * 1024 } });
+const upload = multer({ storage, limits: { fileSize: 20 * 1024 * 1024 } });
+
+// ── Image optimization helper ────────────────────────────────
+let sharp;
+try { sharp = require('sharp'); } catch { sharp = null; }
+
+async function optimizeImage(filePath) {
+  if (!sharp) return; // skip if sharp not available
+  const ext = path.extname(filePath).toLowerCase();
+  if (!['.jpg','.jpeg','.png','.webp'].includes(ext)) return;
+  try {
+    const tmpPath = filePath + '.tmp';
+    await sharp(filePath)
+      .resize(2000, 2000, { fit: 'inside', withoutEnlargement: true })
+      .jpeg({ quality: 82, progressive: true })
+      .toFile(tmpPath);
+    fs.renameSync(tmpPath, filePath);
+  } catch (e) {
+    console.error('Image optimization failed:', e.message);
+  }
+}
 
 app.use(express.json({ limit: '10mb' }));
 app.use(cookieParser());
@@ -129,7 +149,7 @@ app.post('/api/login', async (req, res) => {
   if (!valid) return res.status(401).json({ message: 'Wrong password' });
 
   loginAttempts.delete(ip);
-  const token = jwt.sign({ admin: true, iat: Date.now() }, JWT_SECRET, { expiresIn: '24h' });
+  const token = jwt.sign({ admin: true }, JWT_SECRET, { expiresIn: '24h' });
 
   // Set httpOnly cookie + also return token for header-based auth
   res.cookie('adminToken', token, {
@@ -162,8 +182,17 @@ function requireAuth(req, res, next) {
 
 app.post('/api/change-password', requireAuth, async (req, res) => {
   const { newPassword } = req.body;
-  if (!newPassword || typeof newPassword !== 'string' || newPassword.length < 8) {
+  if (!newPassword || typeof newPassword !== 'string') {
+    return res.status(400).json({ message: 'Password required' });
+  }
+  if (newPassword.length < 8) {
     return res.status(400).json({ message: 'Password must be at least 8 characters' });
+  }
+  if (!/[A-Z]/.test(newPassword)) {
+    return res.status(400).json({ message: 'Password must contain at least one uppercase letter' });
+  }
+  if (!/[0-9]/.test(newPassword)) {
+    return res.status(400).json({ message: 'Password must contain at least one number' });
   }
   const hash = await bcrypt.hash(newPassword, 12);
   await Site.findOneAndUpdate({}, { $set: { adminPasswordHash: hash, adminPassword: null } }, { upsert: true });
@@ -171,8 +200,11 @@ app.post('/api/change-password', requireAuth, async (req, res) => {
   res.json({ success: true, message: 'Password updated. Please login again.' });
 });
 
-// ── Temporary password reset (remove after use) ──────────────
+// ── Password reset (development only — disabled in production) ──
 app.get('/api/reset-admin-password', async (req, res) => {
+  if (process.env.NODE_ENV === 'production') {
+    return res.status(404).json({ message: 'Not found' });
+  }
   const key = req.query.key;
   if (key !== 'reset-estif-2025') return res.status(403).json({ message: 'Forbidden' });
   await Site.findOneAndUpdate({}, { $unset: { adminPasswordHash: 1, adminPassword: 1 } }, { upsert: true });
@@ -192,30 +224,60 @@ app.get('/api/site', async (req, res) => {
   res.json(site || {});
 });
 
-app.put('/api/site', upload.single('aboutImage'), async (req, res) => {
+app.put('/api/site', upload.fields([
+  { name: 'aboutImage', maxCount: 1 },
+  { name: 'cvFile', maxCount: 1 }
+]), async (req, res) => {
   const body = { ...req.body };
   ['statementParagraphs','bioParagraphs','bioAmharic','education','awards'].forEach(k => {
     if (body[k] && typeof body[k] === 'string') {
       try { body[k] = JSON.parse(body[k]); } catch {}
     }
   });
-  if (req.file) body.aboutImage = '/uploads/' + req.file.filename;
+  if (req.files?.aboutImage?.[0]) {
+    const f = req.files.aboutImage[0];
+    body.aboutImage = '/uploads/' + f.filename;
+    await optimizeImage(f.path);
+  }
+  if (req.files?.cvFile?.[0]) {
+    const f = req.files.cvFile[0];
+    body.cvFile = '/uploads/' + f.filename;
+  }
   const site = await Site.findOneAndUpdate({}, { $set: body }, { upsert: true, new: true }).lean();
   res.json(site);
 });
 
 // ── GALLERY ──────────────────────────────────────────────────
 app.get('/api/gallery', async (req, res) => {
-  res.json(await GalleryItem.find().lean());
+  res.json(await GalleryItem.find().sort({ sortOrder: 1 }).lean());
+});
+// Reorder must come BEFORE /:id routes so Express doesn't treat "reorder" as an id
+app.post('/api/gallery/reorder', async (req, res) => {
+  const { order } = req.body;
+  if (!Array.isArray(order)) return res.status(400).json({ message: 'order array required' });
+  await Promise.all(order.map(({ id, sortOrder }) =>
+    GalleryItem.findByIdAndUpdate(id, { $set: { sortOrder } })
+  ));
+  res.json({ success: true });
 });
 app.post('/api/gallery', upload.single('image'), async (req, res) => {
   if (!req.file && !req.body.file) return res.status(400).json({ message: 'Image required' });
-  const item = await GalleryItem.create({ ...req.body, file: req.file ? '/uploads/' + req.file.filename : req.body.file });
+  const filePath = req.file ? path.join(UPLOADS_DIR, req.file.filename) : null;
+  if (filePath) await optimizeImage(filePath);
+  const count = await GalleryItem.countDocuments();
+  const item = await GalleryItem.create({
+    ...req.body,
+    file: req.file ? '/uploads/' + req.file.filename : req.body.file,
+    sortOrder: count
+  });
   res.json(item);
 });
 app.put('/api/gallery/:id', upload.single('image'), async (req, res) => {
   const body = { ...req.body };
-  if (req.file) body.file = '/uploads/' + req.file.filename;
+  if (req.file) {
+    body.file = '/uploads/' + req.file.filename;
+    await optimizeImage(path.join(UPLOADS_DIR, req.file.filename));
+  }
   const item = await GalleryItem.findByIdAndUpdate(req.params.id, { $set: body }, { new: true }).lean();
   res.json(item);
 });
@@ -283,6 +345,44 @@ crudRoutes(Project,   'projects');
 crudRoutes(PressItem, 'press');
 
 app.get('/', (req, res) => res.sendFile(path.join(__dirname, 'public', 'index.html')));
+
+// ── 404 ──────────────────────────────────────────────────────
+app.use((req, res) => {
+  if (req.path.startsWith('/api/')) {
+    return res.status(404).json({ message: 'Not found' });
+  }
+  res.status(404).send(`<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Page Not Found — Estifanos Solomon</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' fill='%23080808'/><text y='72' x='50' text-anchor='middle' font-size='60' font-family='serif' fill='%23c9a84c'>E</text></svg>">
+  <style>
+    *{margin:0;padding:0;box-sizing:border-box}
+    body{background:#080808;color:#f0ede8;font-family:'Georgia',serif;
+      display:flex;align-items:center;justify-content:center;
+      min-height:100vh;text-align:center;padding:2rem}
+    h1{font-size:clamp(4rem,15vw,10rem);color:rgba(201,168,76,0.15);
+      font-weight:900;line-height:1;margin-bottom:1rem}
+    h2{font-size:1.5rem;font-weight:400;margin-bottom:1rem;color:#c9a84c}
+    p{color:rgba(240,237,232,0.5);margin-bottom:2rem;font-size:.95rem}
+    a{color:#c9a84c;text-decoration:none;font-size:.8rem;letter-spacing:2px;
+      text-transform:uppercase;border-bottom:1px solid rgba(201,168,76,0.3);
+      padding-bottom:2px;transition:border-color .3s}
+    a:hover{border-color:#c9a84c}
+  </style>
+</head>
+<body>
+  <div>
+    <h1>404</h1>
+    <h2>Page not found</h2>
+    <p>The page you're looking for doesn't exist.</p>
+    <a href="/">← Back to portfolio</a>
+  </div>
+</body>
+</html>`);
+});
 
 app.listen(PORT, async () => {
   console.log(`Server running on port ${PORT}`);

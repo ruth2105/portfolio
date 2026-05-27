@@ -3,18 +3,79 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <!-- Primary SEO -->
   <title>Estifanos Solomon — Visual Artist & Printmaker</title>
+  <meta name="description" content="Estifanos Solomon is a visual artist and printmaker based in Addis Ababa, Ethiopia. Exploring themes of childhood, society, and resistance through painting and silk screen printmaking.">
+  <meta name="keywords" content="Estifanos Solomon, Ethiopian artist, printmaker, visual art, Addis Ababa, silk screen, contemporary art">
+  <meta name="author" content="Estifanos Solomon">
+  <link rel="canonical" href="https://estifanossolomon.up.railway.app/">
+
+  <!-- Open Graph (Facebook, WhatsApp, LinkedIn) -->
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://estifanossolomon.up.railway.app/">
+  <meta property="og:title" content="Estifanos Solomon — Visual Artist & Printmaker">
+  <meta property="og:description" content="Visual artist and printmaker from Addis Ababa, Ethiopia. Works in painting, mixed media, and silk screen printmaking.">
+  <meta property="og:image" content="https://estifanossolomon.up.railway.app/images/stillness.jpg">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:locale" content="en_US">
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Estifanos Solomon — Visual Artist & Printmaker">
+  <meta name="twitter:description" content="Visual artist and printmaker from Addis Ababa, Ethiopia.">
+  <meta name="twitter:image" content="https://estifanossolomon.up.railway.app/images/stillness.jpg">
+
+  <!-- Favicon (SVG — works in all modern browsers, no file needed) -->
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' fill='%23080808'/><text y='72' x='50' text-anchor='middle' font-size='60' font-family='serif' fill='%23c9a84c'>E</text></svg>">
+
   <link rel="stylesheet" href="styles.css">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css" rel="stylesheet">
+
+  <style>
+    /* ── Page loader skeleton ── */
+    #page-loader {
+      position: fixed; inset: 0; z-index: 99990;
+      background: var(--bg, #080808);
+      display: flex; align-items: center; justify-content: center;
+      flex-direction: column; gap: 1rem;
+      transition: opacity 0.5s ease;
+    }
+    #page-loader.hidden { opacity: 0; pointer-events: none; }
+    .loader-name {
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(1.5rem, 4vw, 2.5rem);
+      color: #c9a84c; font-weight: 400; letter-spacing: 0.05em;
+      opacity: 0; animation: loaderFade 0.6s ease 0.2s forwards;
+    }
+    .loader-bar {
+      width: 120px; height: 1px; background: rgba(201,168,76,0.2);
+      position: relative; overflow: hidden;
+    }
+    .loader-bar::after {
+      content: ''; position: absolute; top: 0; left: -100%;
+      width: 100%; height: 100%; background: #c9a84c;
+      animation: loaderSlide 1.2s ease infinite;
+    }
+    @keyframes loaderFade { to { opacity: 1; } }
+    @keyframes loaderSlide { to { left: 100%; } }
+  </style>
 </head>
 <body>
+  <!-- Page loader -->
+  <div id="page-loader">
+    <span class="loader-name">Estifanos Solomon</span>
+    <div class="loader-bar"></div>
+  </div>
+
   <div id="cursor"></div>
   <div id="cursor-ring"></div>
 
+  <!-- NAVBAR -->
   <nav class="navbar" id="navbar">
     <div class="nav-logo">
       <h2 id="nav-name">Estifanos Solomon</h2>
-      <p id="nav-amharic" style="font-size:0.75rem;opacity:0.6;"></p>
       <p id="nav-title"></p>
     </div>
     <ul class="nav-menu" id="navMenu">
@@ -28,62 +89,70 @@
       <li><a href="#press" class="nav-link">Press</a></li>
       <li><a href="#contact" class="nav-link">Contact</a></li>
     </ul>
-    <div class="hamburger" id="hamburger"><span></span><span></span><span></span></div>
+    <div class="nav-right">
+      <button class="theme-toggle" id="themeToggle" aria-label="Toggle theme">
+        <i class="bi bi-moon icon-moon"></i>
+        <i class="bi bi-sun icon-sun"></i>
+      </button>
+      <div class="hamburger" id="hamburger"><span></span><span></span><span></span></div>
+    </div>
   </nav>
 
   <!-- HERO -->
-  <section id="home" class="hero" style="position:relative;overflow:hidden;min-height:100vh;display:grid;grid-template-columns:1fr 1fr;align-items:stretch;">
-    <div style="display:flex;flex-direction:column;justify-content:center;padding:clamp(2rem,6vw,6rem) clamp(1.5rem,4vw,4rem);background:linear-gradient(135deg,#0a0a0a 60%,#111 100%);z-index:2;">
-      <p class="reveal" id="hero-location" style="font-size:.7rem;letter-spacing:.18em;text-transform:uppercase;opacity:.45;margin-bottom:2rem;color:#fff;"></p>
-      <h1 class="reveal reveal-delay-1" id="hero-name-en" style="font-size:clamp(2.2rem,4.5vw,4.5rem);font-weight:700;color:#fff;margin-bottom:.3rem;line-height:1.05;"></h1>
-      <p class="reveal reveal-delay-1" id="hero-name-am" style="font-size:clamp(.9rem,1.8vw,1.3rem);color:rgba(255,255,255,0.4);margin-bottom:.6rem;font-weight:300;"></p>
-      <p class="reveal reveal-delay-2" id="hero-title-line" style="font-size:.72rem;letter-spacing:.16em;text-transform:uppercase;color:rgba(255,255,255,0.35);margin-bottom:2.5rem;"></p>
-      <div style="width:40px;height:1px;background:rgba(255,255,255,0.2);margin-bottom:2rem;"></div>
-      <p class="reveal reveal-delay-2" id="hero-quote" style="font-size:clamp(.85rem,1.4vw,1rem);font-style:italic;color:rgba(255,255,255,0.6);line-height:1.9;margin-bottom:2.5rem;max-width:420px;"></p>
-      <div class="hero-btns reveal reveal-delay-3" style="margin-bottom:2rem;">
+  <section id="home" class="hero">
+    <div class="hero-left">
+      <p class="hero-location reveal" id="hero-location"></p>
+      <h1 class="reveal reveal-delay-1" id="hero-name-en"></h1>
+      <p class="hero-amharic reveal reveal-delay-1" id="hero-name-am"></p>
+      <p class="hero-discipline reveal reveal-delay-2" id="hero-title-line"></p>
+      <p class="hero-description reveal reveal-delay-2" id="hero-quote"></p>
+      <div class="hero-btns reveal reveal-delay-3">
         <a href="#gallery" class="btn-primary">Enter Gallery</a>
         <a href="#statement" class="btn-ghost">Read Statement</a>
       </div>
       <div class="hero-socials reveal reveal-delay-3" id="hero-socials"></div>
     </div>
-    <div style="position:relative;overflow:hidden;">
-      <img src="/images/IMG_20260414_120513_967.jpg" alt="Estifanos Solomon" style="width:100%;height:100%;object-fit:cover;object-position:center top;display:block;filter:blur(2px);transform:scale(1.05);">
-      <div style="position:absolute;inset:0;background:linear-gradient(to right,#0a0a0a 0%,transparent 35%);"></div>
+    <div class="hero-right">
+      <img src="/images/IMG_20260414_120513_967.jpg" alt="Estifanos Solomon" class="hero-photo">
+      <div class="hero-photo-fade"></div>
     </div>
     <div class="hero-scroll">Scroll</div>
   </section>
 
-    <!-- GALLERY -->
+  <!-- GALLERY -->
   <section id="gallery" class="gallery">
-    <div class="section-label reveal">Works</div>
-    <h2 class="section-heading reveal reveal-delay-1">Art<br><em>Works</em></h2>
+    <div class="section-intro">
+      <span class="section-label reveal">Works</span>
+      <h2 class="section-heading reveal reveal-delay-1">Selected<br><em>Works</em></h2>
+    </div>
     <div class="gallery-grid" id="galleryGrid"></div>
   </section>
 
   <!-- STATEMENT -->
   <section id="statement" class="statement">
-    <div class="section-label reveal">Voice</div>
-    <h2 class="section-heading reveal reveal-delay-1">Artist<br><em>Statement</em></h2>
-    <div class="statement-inner" style="display:grid;grid-template-columns:1fr 1.4fr;gap:5rem;align-items:start;max-width:1200px;">
-      <div>
-        <img src="/images/20260125_125225.jpg" alt="Artist Statement" style="width:100%;border-radius:4px;object-fit:cover;display:block;">
-      </div>
-      <div>
-        <p style="font-size:.7rem;letter-spacing:.15em;text-transform:uppercase;opacity:.45;margin-bottom:1.5rem;">The Statement</p>
+    <div class="statement-inner">
+      <div class="statement-text-col">
+        <span class="section-label reveal">Voice</span>
+        <h2 class="section-heading reveal reveal-delay-1">Artist<br><em>Statement</em></h2>
         <div class="statement-body" id="statement-body"></div>
+      </div>
+      <div class="statement-image-col">
+        <img src="/images/20260125_125225.jpg" alt="Artist at work" class="statement-img reveal">
         <blockquote class="statement-quote reveal" id="statement-quote"></blockquote>
       </div>
     </div>
-    </section>
+  </section>
 
   <!-- ABOUT -->
   <section id="about" class="about">
     <div class="about-grid">
-      <div class="about-image-wrap reveal"><img id="about-img" src="" alt="Estifanos Solomon"></div>
+      <div class="about-image-wrap reveal">
+        <img id="about-img" src="" alt="Estifanos Solomon">
+      </div>
       <div class="about-text">
         <p class="about-tag reveal">The Artist</p>
         <h3 class="about-name reveal reveal-delay-1" id="about-name"></h3>
-        <p class="reveal" id="about-amharic" style="font-size:0.85rem;opacity:0.6;margin-top:-0.5rem;"></p>
+        <p class="about-amharic reveal" id="about-amharic"></p>
         <div class="about-bio" id="about-bio"></div>
         <div class="cv-grid reveal" id="cv-grid"></div>
       </div>
@@ -92,7 +161,7 @@
 
   <!-- EXHIBITIONS -->
   <section id="exhibitions" class="exhibitions">
-    <div class="section-label reveal">History</div>
+    <span class="section-label reveal">History</span>
     <h2 class="section-heading reveal reveal-delay-1">Shows &amp;<br><em>Exhibitions</em></h2>
     <div class="ex-tabs reveal reveal-delay-2">
       <button class="ex-tab active" data-tab="group">Group</button>
@@ -106,32 +175,31 @@
 
   <!-- UPCOMING EVENTS -->
   <section id="upcoming" class="exhibitions" style="display:none">
-    <div class="section-label reveal">What's Next</div>
+    <span class="section-label reveal">What's Next</span>
     <h2 class="section-heading reveal reveal-delay-1">Upcoming<br><em>Events</em></h2>
     <ul class="ex-list" id="dynamic-events"></ul>
   </section>
 
   <!-- PROJECTS -->
   <section id="projects" class="exhibitions" style="display:none">
-    <div class="section-label reveal">Work</div>
+    <span class="section-label reveal">Work</span>
     <h2 class="section-heading reveal reveal-delay-1">Projects &amp;<br><em>Collaborations</em></h2>
     <ul class="ex-list" id="dynamic-projects"></ul>
   </section>
 
   <!-- PRESS -->
   <section id="press" class="press">
-    <div class="section-label reveal">Recognition</div>
+    <span class="section-label reveal">Recognition</span>
     <h2 class="section-heading reveal reveal-delay-1">Press &amp;<br><em>Publications</em></h2>
     <div class="press-grid" id="press-grid"></div>
   </section>
 
   <!-- CONTACT -->
   <section id="contact" class="contact">
-    <div class="section-label reveal">Connect</div>
-    <h2 class="section-heading reveal reveal-delay-1">Get in<br><em>Touch</em></h2>
     <div class="contact-inner">
       <div class="contact-left reveal">
-        <h3>Get in touch</h3>
+        <span class="section-label">Connect</span>
+        <h2 class="section-heading">Get in<br><em>Touch</em></h2>
         <p id="contact-note"></p>
         <ul class="contact-links" id="contact-links"></ul>
       </div>
@@ -153,6 +221,7 @@
     <div class="footer-socials" id="footer-socials"></div>
   </footer>
 
+  <!-- LIGHTBOX -->
   <div id="lightbox" class="lightbox" role="dialog" aria-modal="true" aria-label="Image viewer">
     <button class="lightbox-close" id="lightboxClose" aria-label="Close">&times;</button>
     <button class="lightbox-prev" id="lightboxPrev" aria-label="Previous">&#8249;</button>
@@ -177,15 +246,15 @@
     ]);
 
     const fmt = d => d ? new Date(d).toLocaleDateString('en-GB',{day:'numeric',month:'long',year:'numeric'}) : '';
-    const yr  = d => d ? new Date(d).getFullYear() : '';
-
     const fixPath = p => p && !p.startsWith('/') && !p.startsWith('http') ? '/' + p : p;
 
-    // NAV + TITLE
+    // NAV + TITLE + dynamic SEO
     document.title = site.name + ' — ' + site.title;
     document.getElementById('nav-name').textContent = site.name;
-    document.getElementById('nav-amharic').textContent = site.nameAmharic || '';
     document.getElementById('nav-title').textContent = site.title;
+    // Update OG tags dynamically
+    document.querySelector('meta[property="og:title"]')?.setAttribute('content', site.name + ' — ' + site.title);
+    document.querySelector('meta[property="og:description"]')?.setAttribute('content', site.contactNote || '');
 
     // HERO
     document.getElementById('hero-location').textContent = site.location;
@@ -197,22 +266,29 @@
       <a href="${site.instagram}" target="_blank" aria-label="Instagram"><i class="bi bi-instagram"></i></a>
       <a href="mailto:${site.email}" aria-label="Email"><i class="bi bi-envelope"></i></a>`;
 
-    // GALLERY - sort by area ascending
-    const area = d => { if(!d) return 999999; const m=d.match(/([\d.]+)[x*]([\d.]+)/i); return m?parseFloat(m[1])*parseFloat(m[2]):999999; };
-    gallery.sort((a,b) => area(a.dimensions) - area(b.dimensions));
+    // GALLERY — sort by sortOrder field, fallback to area
+    const area = d => {
+      if (!d) return 999999;
+      const m = d.match(/([\d.]+)[x*]([\d.]+)/i);
+      return m ? parseFloat(m[1]) * parseFloat(m[2]) : 999999;
+    };
+    gallery.sort((a, b) => {
+      if (a.sortOrder != null && b.sortOrder != null) return a.sortOrder - b.sortOrder;
+      return area(a.dimensions) - area(b.dimensions);
+    });
     document.getElementById('galleryGrid').innerHTML = gallery.map(g => `
       <div class="gallery-item reveal">
-        <img src="${fixPath(g.file)}" alt="${g.title}">
+        <img src="${fixPath(g.file)}" alt="${g.title}" loading="lazy">
         <div class="gallery-overlay">
           <h4>${g.title}</h4>
           <span>${[g.medium, g.dimensions, g.year].filter(Boolean).join(' · ')}</span>
         </div>
       </div>`).join('');
 
-    // Re-observe new reveal elements and re-init lightbox
+    // Re-observe new reveal elements
     const revealObserver = new IntersectionObserver(entries => {
       entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
-    }, { threshold: 0.1, rootMargin: '0px 0px -60px 0px' });
+    }, { threshold: 0.08, rootMargin: '0px 0px -40px 0px' });
     document.querySelectorAll('.reveal').forEach(el => revealObserver.observe(el));
 
     // Re-init lightbox with new gallery items
@@ -233,26 +309,54 @@
 
     // STATEMENT
     document.getElementById('statement-body').innerHTML =
-      (site.statementParagraphs || []).map((p,i) =>
-        `<p class="reveal${i>0?' reveal-delay-'+i:''}">${p}</p>`).join('');
+      (site.statementParagraphs || []).map((p, i) =>
+        `<p class="reveal${i > 0 ? ' reveal-delay-' + Math.min(i, 3) : ''}">${p}</p>`).join('');
     document.getElementById('statement-quote').textContent = site.statementQuote;
 
     // ABOUT
     document.getElementById('about-img').src = fixPath(site.aboutImage);
     document.getElementById('about-name').textContent = site.name;
     document.getElementById('about-amharic').textContent = site.nameAmharic || '';
-    const bioHTML = (site.bioParagraphs||[]).map(p=>`<p>${p}</p>`).join('') +
-      '<div class="bio-divider"></div>' +
-      (site.bioAmharic||[]).map(p=>`<p>${p}</p>`).join('');
-    document.getElementById('about-bio').innerHTML = bioHTML;
+
+    // Bio with EN/AM toggle
+    const hasAmharic = site.bioAmharic && site.bioAmharic.length > 0;
+    const bioToggle = hasAmharic ? `
+      <div class="bio-toggle">
+        <button class="bio-lang-btn active" data-lang="en">English</button>
+        <button class="bio-lang-btn" data-lang="am">አማርኛ</button>
+      </div>` : '';
+    const bioEnHTML = (site.bioParagraphs || []).map(p => `<p>${p}</p>`).join('');
+    const bioAmHTML = hasAmharic ? (site.bioAmharic || []).map(p => `<p class="bio-am-text">${p}</p>`).join('') : '';
+    document.getElementById('about-bio').innerHTML =
+      bioToggle +
+      `<div class="bio-en-content">${bioEnHTML}</div>` +
+      (hasAmharic ? `<div class="bio-am-content" style="display:none">${bioAmHTML}</div>` : '');
+
+    // Wire up toggle buttons
+    document.querySelectorAll('.bio-lang-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.bio-lang-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        const lang = btn.dataset.lang;
+        document.querySelector('.bio-en-content').style.display = lang === 'en' ? 'block' : 'none';
+        document.querySelector('.bio-am-content').style.display = lang === 'am' ? 'block' : 'none';
+      });
+    });
+
+    // CV download link
+    const cvDownload = site.cvFile
+      ? `<a href="${fixPath(site.cvFile)}" download class="cv-download"><i class="bi bi-download"></i> Download CV</a>`
+      : '';
+
     document.getElementById('cv-grid').innerHTML = `
-      <div class="cv-block"><h5>Education</h5><ul>${(site.education||[]).map(e=>`<li>${e}</li>`).join('')}</ul></div>
-      <div class="cv-block"><h5>Awards</h5><ul>${(site.awards||[]).map(a=>`<li>${a}</li>`).join('')}</ul></div>`;
+      <div class="cv-block"><h5>Education</h5><ul>${(site.education || []).map(e => `<li>${e}</li>`).join('')}</ul></div>
+      <div class="cv-block"><h5>Awards</h5><ul>${(site.awards || []).map(a => `<li>${a}</li>`).join('')}</ul></div>
+      ${cvDownload ? `<div class="cv-block" style="grid-column:1/-1">${cvDownload}</div>` : ''}`;
 
     // EXHIBITIONS
-    ['group','solo','workshops'].forEach(tab => {
-      document.getElementById('exlist-'+tab).innerHTML =
-        (exhibitions[tab]||[]).map(e => `
+    ['group', 'solo', 'workshops'].forEach(tab => {
+      document.getElementById('exlist-' + tab).innerHTML =
+        (exhibitions[tab] || []).map(e => `
           <li>
             <span class="ex-year">${e.year}</span>
             <div class="ex-info"><strong>${e.title}</strong><span>${e.venue}</span></div>
@@ -263,14 +367,14 @@
     if (events.length) {
       document.getElementById('dynamic-events').innerHTML = events.map(e => `
         <li style="display:block;padding:0;margin-bottom:2rem;border:none">
-          <div style="display:grid;grid-template-columns:${e.image?'1fr 1fr':'1fr'};gap:2rem;align-items:start;background:rgba(255,255,255,0.03);border-radius:12px;padding:1.5rem;border:1px solid rgba(255,255,255,0.07)">
-            ${e.image?`<img src="${e.image}" style="width:100%;border-radius:8px;object-fit:cover;max-height:280px">`:'' }
+          <div style="display:grid;grid-template-columns:${e.image ? '1fr 1fr' : '1fr'};gap:2rem;align-items:start;background:rgba(255,255,255,0.03);border-radius:12px;padding:1.5rem;border:1px solid rgba(255,255,255,0.07)">
+            ${e.image ? `<img src="${e.image}" style="width:100%;border-radius:8px;object-fit:cover;max-height:280px">` : ''}
             <div>
               <p style="font-size:.75rem;letter-spacing:.12em;text-transform:uppercase;opacity:.5;margin-bottom:.4rem">${fmt(e.date)}</p>
               <h3 style="font-size:1.4rem;font-weight:600;margin-bottom:.5rem;line-height:1.3">${e.title}</h3>
-              ${e.location?`<p style="font-size:.85rem;opacity:.6;margin-bottom:.75rem;display:flex;align-items:center;gap:.3rem"><i class="bi bi-geo-alt"></i> ${e.location}</p>`:''}
-              ${e.description?`<p style="font-size:.9rem;line-height:1.7;opacity:.8;margin-bottom:1rem">${e.description}</p>`:''}
-              ${e.link?`<a href="${e.link}" target="_blank" style="display:inline-flex;align-items:center;gap:.4rem;font-size:.85rem;padding:.5rem 1.1rem;border:1px solid currentColor;border-radius:4px;text-decoration:none;opacity:.8">More info <i class="bi bi-arrow-up-right"></i></a>`:''}
+              ${e.location ? `<p style="font-size:.85rem;opacity:.6;margin-bottom:.75rem"><i class="bi bi-geo-alt"></i> ${e.location}</p>` : ''}
+              ${e.description ? `<p style="font-size:.9rem;line-height:1.7;opacity:.8;margin-bottom:1rem">${e.description}</p>` : ''}
+              ${e.link ? `<a href="${e.link}" target="_blank" style="display:inline-flex;align-items:center;gap:.4rem;font-size:.85rem;padding:.5rem 1.1rem;border:1px solid currentColor;border-radius:4px;text-decoration:none;opacity:.8">More info <i class="bi bi-arrow-up-right"></i></a>` : ''}
             </div>
           </div>
         </li>`).join('');
@@ -282,13 +386,13 @@
     if (projects.length) {
       document.getElementById('dynamic-projects').innerHTML = projects.map(p => `
         <li>
-          <span class="ex-year">${p.year||''}</span>
+          <span class="ex-year">${p.year || ''}</span>
           <div class="ex-info">
-            ${p.image?`<img src="${p.image}" style="width:100%;max-width:320px;border-radius:8px;margin-bottom:.5rem;display:block">`:''}
+            ${p.image ? `<img src="${p.image}" style="width:100%;max-width:320px;border-radius:8px;margin-bottom:.5rem;display:block">` : ''}
             <strong>${p.title}</strong>
-            <span>${p.medium||''}</span>
-            ${p.description?`<span style="display:block;font-size:.85em;opacity:.65;margin-top:.2rem">${p.description}</span>`:''}
-            ${p.link?`<a href="${p.link}" target="_blank" style="font-size:.82em">View ↗</a>`:''}
+            <span>${p.medium || ''}</span>
+            ${p.description ? `<span style="display:block;font-size:.85em;opacity:.65;margin-top:.2rem">${p.description}</span>` : ''}
+            ${p.link ? `<a href="${p.link}" target="_blank" style="font-size:.82em">View ↗</a>` : ''}
           </div>
         </li>`).join('');
       document.getElementById('projects').style.display = '';
@@ -297,27 +401,20 @@
 
     // PRESS (static + dynamic)
     const allPress = [
-      ...pressStatic.map((p,i) => ({ ...p, numStr: String(i+1).padStart(2,'0') })),
-      ...press.map((p,i) => ({ ...p, numStr: String(pressStatic.length+i+1).padStart(2,'0') }))
+      ...pressStatic.map((p, i) => ({ ...p, numStr: String(i + 1).padStart(2, '0') })),
+      ...press.map((p, i) => ({ ...p, numStr: String(pressStatic.length + i + 1).padStart(2, '0') }))
     ];
     document.getElementById('press-grid').innerHTML = allPress.map(p => {
       const tag = p.link ? 'a' : 'div';
       const attrs = p.link ? `href="${p.link}" target="_blank" rel="noopener"` : '';
-      return `<${tag} ${attrs} class="press-card press-card-link">
-        <span class="press-num">${p.numStr||p.num}</span>
-        ${p.image?`<img src="${p.image}" style="width:100%;height:140px;object-fit:cover;border-radius:6px;margin-bottom:.75rem">`:''}
+      return `<${tag} ${attrs} class="press-card press-card-link reveal">
+        <span class="press-num">${p.numStr || p.num}</span>
+        ${p.image ? `<img src="${p.image}" style="width:100%;height:140px;object-fit:cover;border-radius:6px;margin-bottom:.75rem">` : ''}
         <h4>${p.title}</h4>
-        <p>${p.publication}${p.location?' — '+p.location:''}</p>
-        <span class="press-date">${p.date||''}</span>
-        ${p.link?`<span style="display:inline-block;margin-top:.75rem;font-size:.78rem;letter-spacing:.08em;text-transform:uppercase;border-bottom:1px solid currentColor;padding-bottom:2px;opacity:.7">Read Article ↗</span>`:''}
+        <p>${p.publication}${p.location ? ' — ' + p.location : ''}</p>
+        <span class="press-date">${p.date || ''} ${p.link ? '· Read ↗' : ''}</span>
       </${tag}>`;
     }).join('');
-
-    // Re-observe all reveal elements after full page load
-    document.querySelectorAll('.reveal').forEach(el => revealObserver.observe(el));
-
-    // Re-observe all reveal elements after full page load
-    document.querySelectorAll('.reveal').forEach(el => revealObserver.observe(el));
 
     // CONTACT
     document.getElementById('contact-note').textContent = site.contactNote;
@@ -334,7 +431,11 @@
       <a href="mailto:${site.email}" aria-label="Email"><i class="bi bi-envelope"></i></a>`;
   }
 
-  loadPage();
+  loadPage().finally(() => {
+    const loader = document.getElementById('page-loader');
+    loader.classList.add('hidden');
+    setTimeout(() => loader.remove(), 600);
+  });
   </script>
 </body>
 </html>
