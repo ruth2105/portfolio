@@ -1,4 +1,4 @@
-app = "estifanos-solomon"
+app = "estif-solomon"
 primary_region = "jnb"  # Johannesburg — closest to Addis Ababa
 
 [build]
