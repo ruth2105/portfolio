@@ -98,9 +98,11 @@
     </div>
   </nav>
 
-  <!-- HERO -->
+  <!-- HERO — full screen, photo as background -->
   <section id="home" class="hero">
-    <div class="hero-left">
+    <img src="/images/IMG_20260414_120513_967.jpg" alt="Estifanos Solomon" class="hero-bg-photo">
+    <div class="hero-bg-overlay"></div>
+    <div class="hero-content">
       <p class="hero-location reveal" id="hero-location"></p>
       <h1 class="reveal reveal-delay-1" id="hero-name-en"></h1>
       <p class="hero-amharic reveal reveal-delay-1" id="hero-name-am"></p>
@@ -111,10 +113,6 @@
         <a href="#statement" class="btn-ghost">Read Statement</a>
       </div>
       <div class="hero-socials reveal reveal-delay-3" id="hero-socials"></div>
-    </div>
-    <div class="hero-right">
-      <img src="/images/IMG_20260414_120513_967.jpg" alt="Estifanos Solomon" class="hero-photo">
-      <div class="hero-photo-fade"></div>
     </div>
     <div class="hero-scroll">Scroll</div>
   </section>
@@ -225,9 +223,17 @@
   <div id="lightbox" class="lightbox" role="dialog" aria-modal="true" aria-label="Image viewer">
     <button class="lightbox-close" id="lightboxClose" aria-label="Close">&times;</button>
     <button class="lightbox-prev" id="lightboxPrev" aria-label="Previous">&#8249;</button>
-    <img id="lightboxImg" src="" alt="">
-    <p class="lightbox-caption" id="lightboxCaption"></p>
+    <div class="lightbox-inner">
+      <img id="lightboxImg" src="" alt="">
+      <div class="lightbox-info">
+        <h3 class="lightbox-title" id="lightboxTitle"></h3>
+        <p class="lightbox-meta" id="lightboxMedium"></p>
+        <p class="lightbox-meta" id="lightboxDimensions"></p>
+        <p class="lightbox-year" id="lightboxYear"></p>
+      </div>
+    </div>
     <button class="lightbox-next" id="lightboxNext" aria-label="Next">&#8250;</button>
+  </div>
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
@@ -277,7 +283,11 @@
       return area(a.dimensions) - area(b.dimensions);
     });
     document.getElementById('galleryGrid').innerHTML = gallery.map(g => `
-      <div class="gallery-item reveal">
+      <div class="gallery-item reveal"
+           data-title="${g.title}"
+           data-medium="${g.medium || ''}"
+           data-dimensions="${g.dimensions || ''}"
+           data-year="${g.year || ''}">
         <img src="${fixPath(g.file)}" alt="${g.title}" loading="lazy">
         <div class="gallery-overlay">
           <h4>${g.title}</h4>
@@ -295,13 +305,21 @@
     const items = document.querySelectorAll('.gallery-item');
     const images = Array.from(items).map(item => ({
       src: item.querySelector('img').src,
-      caption: item.querySelector('h4')?.textContent || ''
+      title: item.dataset.title || '',
+      medium: item.dataset.medium || '',
+      dimensions: item.dataset.dimensions || '',
+      year: item.dataset.year || ''
     }));
     items.forEach((item, i) => {
       item.addEventListener('click', () => {
         const lightbox = document.getElementById('lightbox');
-        document.getElementById('lightboxImg').src = images[i].src;
-        document.getElementById('lightboxCaption').textContent = images[i].caption;
+        const d = images[i];
+        document.getElementById('lightboxImg').src = d.src;
+        document.getElementById('lightboxImg').alt = d.title;
+        document.getElementById('lightboxTitle').textContent = d.title;
+        document.getElementById('lightboxMedium').textContent = d.medium;
+        document.getElementById('lightboxDimensions').textContent = d.dimensions;
+        document.getElementById('lightboxYear').textContent = d.year;
         lightbox.classList.add('active');
         document.body.style.overflow = 'hidden';
       });
@@ -405,15 +423,15 @@
       ...press.map((p, i) => ({ ...p, numStr: String(pressStatic.length + i + 1).padStart(2, '0') }))
     ];
     document.getElementById('press-grid').innerHTML = allPress.map(p => {
-      const tag = p.link ? 'a' : 'div';
-      const attrs = p.link ? `href="${p.link}" target="_blank" rel="noopener"` : '';
-      return `<${tag} ${attrs} class="press-card press-card-link reveal">
+      const tag = p.link ? 'div' : 'div';
+      return `<div class="press-card reveal">
         <span class="press-num">${p.numStr || p.num}</span>
         ${p.image ? `<img src="${p.image}" style="width:100%;height:140px;object-fit:cover;border-radius:6px;margin-bottom:.75rem">` : ''}
         <h4>${p.title}</h4>
         <p>${p.publication}${p.location ? ' — ' + p.location : ''}</p>
-        <span class="press-date">${p.date || ''} ${p.link ? '· Read ↗' : ''}</span>
-      </${tag}>`;
+        <span class="press-date">${p.date || ''}</span>
+        ${p.link ? `<a href="${p.link}" target="_blank" rel="noopener" class="press-read-link">Read Article <i class="bi bi-arrow-up-right"></i></a>` : ''}
+      </div>`;
     }).join('');
 
     // CONTACT

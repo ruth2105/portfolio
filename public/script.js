@@ -108,14 +108,16 @@ document.querySelectorAll('.ex-tab').forEach(tab => {
 (function () {
   const lightbox = document.getElementById('lightbox');
   const lightboxImg = document.getElementById('lightboxImg');
-  const lightboxCaption = document.getElementById('lightboxCaption');
   let images = [], current = 0;
 
   document.addEventListener('DOMContentLoaded', () => {
     const items = document.querySelectorAll('.gallery-item');
     images = Array.from(items).map(item => ({
       src: item.querySelector('img').src,
-      caption: item.querySelector('h4')?.textContent || ''
+      title: item.dataset.title || '',
+      medium: item.dataset.medium || '',
+      dimensions: item.dataset.dimensions || '',
+      year: item.dataset.year || ''
     }));
     items.forEach((item, i) => {
       item.addEventListener('click', () => open(i));
@@ -124,8 +126,13 @@ document.querySelectorAll('.ex-tab').forEach(tab => {
 
   function open(i) {
     current = i;
-    lightboxImg.src = images[i].src;
-    lightboxCaption.textContent = images[i].caption;
+    const d = images[i];
+    lightboxImg.src = d.src;
+    lightboxImg.alt = d.title;
+    document.getElementById('lightboxTitle').textContent = d.title;
+    document.getElementById('lightboxMedium').textContent = d.medium;
+    document.getElementById('lightboxDimensions').textContent = d.dimensions;
+    document.getElementById('lightboxYear').textContent = d.year;
     lightbox.classList.add('active');
     document.body.style.overflow = 'hidden';
     history.pushState({ lightbox: true }, '');
@@ -141,9 +148,7 @@ document.querySelectorAll('.ex-tab').forEach(tab => {
   document.getElementById('lightboxPrev').addEventListener('click', prev);
   document.getElementById('lightboxNext').addEventListener('click', next);
   lightbox.addEventListener('click', e => { if (e.target === lightbox) close(); });
-  window.addEventListener('popstate', e => {
-    if (lightbox.classList.contains('active')) close();
-  });
+  window.addEventListener('popstate', () => { if (lightbox.classList.contains('active')) close(); });
   document.addEventListener('keydown', e => {
     if (!lightbox.classList.contains('active')) return;
     if (e.key === 'Escape') close();
