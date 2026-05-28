@@ -494,7 +494,7 @@
       <li><a href="#"><i class="bi bi-geo-alt"></i> ${site.location}</a></li>`;
 
     // FOOTER
-    document.getElementById('footer-copy').textContent = `© ${new Date().getFullYear()} ${site.name} · All rights reserved`;
+    document.getElementById('footer-copy').innerHTML = `© ${new Date().getFullYear()} ${site.name} · All rights reserved &nbsp;·&nbsp; <span style="color:var(--gold);opacity:0.7">Designed &amp; Developed by Ruth Mesfin</span>`;
     document.getElementById('footer-socials').innerHTML = `
       <a href="${site.instagram}" target="_blank" aria-label="Instagram"><i class="bi bi-instagram"></i></a>
       <a href="mailto:${site.email}" aria-label="Email"><i class="bi bi-envelope"></i></a>`;
